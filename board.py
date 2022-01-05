@@ -3,7 +3,6 @@ import pygame.gfxdraw
 from piece import Piece
 from number import Number
 from button import Button
-from dice import Dice
 from text import Text 
 from constants import *
 
@@ -11,7 +10,7 @@ from constants import *
 class Board:
 
     def __init__(self):
-        self.board_play_rect_width = 6 * SQUARE_SIZE
+        self.board_play_rect_width = 300
         self.middle_border_size = 50 + ((WIDTH - 950) / 3) 
         self.board_play_area_width = self.board_play_rect_width * 2 + self.middle_border_size
         self.vertical_border_size = 50
@@ -26,35 +25,31 @@ class Board:
         self.black_pieces_holder_list = []
         self.white_pieces_holder = pygame.Rect(0, 0, 0, 0)
         self.black_pieces_holder = pygame.Rect(0, 0, 0, 0)
-        self.left_play_rect_x, self.left_play_rect_y  = self.left_play_rect_cords()
-        self.right_play_rect_x, self.right_play_rect_y = self.right_play_rect_cord()
-        self.left_play_rect, self.right_play_rect = self.create_play_rects() 
+        self.left_border = self.create_left_border()
+        self.right_border = self.create_right_border()
+        self.middle_border = self.create_middle_border()
+        self.top_border = self.create_top_border()
+        self.bottom_border = self.create_bottom_border()
         self.numbers = self.create_numbers()
         self.texts = self.create_texts()
         self.buttons = self.create_buttons()
-        self.dices = self.create_dices()
-
-    def left_play_rect_cords(self):
-
-        left_play_rect_x = self.horizontal_border_size
-        left_play_rect_y = self.vertical_border_size
+        self.dices = []
         
-        return left_play_rect_x, left_play_rect_y
+    def create_left_border(self):
+        return pygame.Rect(0, 0, self.horizontal_border_size, HEIGHT)
 
-    def right_play_rect_cord(self):
-    
-        right_play_rect_x = self.horizontal_border_size + self.board_play_rect_width + self.middle_border_size
-        right_play_rect_y = self.vertical_border_size
-    
-        return right_play_rect_x, right_play_rect_y
-    
-    def create_play_rects(self):
-        board_play_rect_height = HEIGHT - 2 * self.vertical_border_size
-        left_play_rect = pygame.Rect(self.left_play_rect_x, self.left_play_rect_y, self.board_play_rect_width, board_play_rect_height)
-        right_play_rect = pygame.Rect(self.right_play_rect_x, self.right_play_rect_y , self.board_play_rect_width, board_play_rect_height)
-        return left_play_rect, right_play_rect
-    
-        
+    def create_right_border(self):
+        return pygame.Rect(self.horizontal_border_size + self.board_play_area_width, 0, self.horizontal_border_size, HEIGHT)
+
+    def create_middle_border(self):
+        return pygame.Rect(self.horizontal_border_size + self.board_play_rect_width, 0, self.middle_border_size, HEIGHT)
+
+    def create_top_border(self):
+        return pygame.Rect(0, 0, WIDTH, self.vertical_border_size)
+
+    def create_bottom_border(self):
+        return pygame.Rect(0, HEIGHT - self.vertical_border_size, WIDTH, self.vertical_border_size)
+
     def triangle_is_not_empty(self, tri_num):
         return self.pieces[tri_num]
 
@@ -285,45 +280,43 @@ class Board:
         undo_button_y = HEIGHT / 2 - y_distance_between_btns - button_height
         draw_button_y = HEIGHT / 2 + y_distance_between_btns 
         self.buttons["undo"] = Button(button_x, undo_button_y, button_width, button_height, WHITE, "undo")
-        self.buttons["roll dices"] = Button(button_x, draw_button_y, button_width, button_height, WHITE, "roll dices")
+        self.buttons["draw dices"] = Button(button_x, draw_button_y, button_width, button_height, WHITE, "draw dices")
 
         return self.buttons
 
     def create_texts(self):
-        texts = []
+        self.texts = []
 
         # White bar text
+        white_bar_text = Text("white bar")
         white_bar_text_x = self.horizontal_border_size + self.board_play_rect_width
         white_bar_text_y = HEIGHT - self.vertical_border_size
-        white_bar_env_width = self.middle_border_size
-        white_bar_env_height = self.vertical_border_size
-        white_bar_text = Text("white bar", white_bar_text_x, white_bar_text_y, white_bar_env_width, white_bar_env_height)
-        texts.append(white_bar_text)
+        white_bar_text.add_paddings(white_bar_text_x, white_bar_text_y, self.middle_border_size, self.vertical_border_size)
+        self.texts.append(white_bar_text)
 
         # Black bar text
+        Black_bar_text = Text("black bar")
         Black_bar_text_x = self.horizontal_border_size + self.board_play_rect_width
         Black_bar_text_y = 0
-        Black_bar_env_width = self.middle_border_size
-        Black_bar_env_height = self.vertical_border_size
-        Black_bar_text = Text("black bar", Black_bar_text_x, Black_bar_text_y, Black_bar_env_width, Black_bar_env_height)
-        texts.append(Black_bar_text)
+        Black_bar_text.add_paddings(Black_bar_text_x, Black_bar_text_y, self.middle_border_size, self.vertical_border_size)
+        self.texts.append(Black_bar_text)
 
-        turn_text_x = 0
-        turn_text_y = 0
-        turn_text_env_width = self.horizontal_border_size
-        turn_text_env_height = HEIGHT / 2
-        turn_text = Text("turn:", turn_text_x, turn_text_y, turn_text_env_width, turn_text_env_height)
-        texts.append(turn_text)
-
-        return texts
+        return self.texts
 
     def draw_background(self, surface):
-        surface.fill(GRAY)
+        surface.fill(BACKGROUND_COLOR)
 
-    def draw_play_rects(self, surface):
-        self.left_play_rect, self.right_play_rect = self.create_play_rects()
-        pygame.draw.rect(surface, BOLD_CREAM, self.left_play_rect)
-        pygame.draw.rect(surface, BOLD_CREAM, self.right_play_rect)
+    def draw_borders(self, surface):
+
+        pygame.draw.rect(surface, GRAY, self.left_border)
+
+        pygame.draw.rect(surface, GRAY, self.right_border)
+
+        pygame.draw.rect(surface, GRAY, self.middle_border)
+
+        pygame.draw.rect(surface, GRAY, self.top_border)
+
+        pygame.draw.rect(surface, GRAY, self.bottom_border)
 
     def draw_piece_holders(self, surface):
         # pieces holders
@@ -338,7 +331,6 @@ class Board:
         # draw pieces holders
         pygame.draw.rect(surface, BROWN, self.white_pieces_holder)
         pygame.draw.rect(surface, BROWN, self.black_pieces_holder)
-    
     def draw_texts(self, surface):
         for text in self.texts:
             text.draw(surface)
@@ -350,21 +342,6 @@ class Board:
     def draw_buttons(self, surface):
         for btn in self.buttons.values():
             btn.draw(surface, btn.name)
-
-    def create_dices(self):
-        dices = []
-        dices_width, dices_height = 40, 40
-        dices_y = HEIGHT / 2 - dices_height / 2
-       
-        dice_1_x = self.horizontal_border_size / 2 - (5 + dices_width)
-        dice_1 = Dice(dices_width, dices_height, WHITE, dice_1_x, dices_y)
-        dices.append(dice_1)
-       
-        dice_2_x = self.horizontal_border_size / 2 + 5 
-        dice_2 = Dice(dices_width, dices_height, WHITE, dice_2_x, dices_y)
-        dices.append(dice_2)
-
-        return dices   
 
     def draw_pieces_in_mid(self, surface):
         for piece in self.white_pieces_in_mid:
@@ -393,7 +370,7 @@ class Board:
     def draw_board(self, surface):
         
         self.draw_background(surface)
-        self.draw_play_rects(surface)
+        self.draw_borders(surface)
         self.draw_all_triangles(surface)
         self.draw_numbers(surface)
         self.draw_texts(surface)
@@ -405,6 +382,10 @@ class Board:
 
         self.draw_white_pieces_in_holder(surface)
         self.draw_black_pieces_in_holder(surface)
- 
+
+    def set_dices(self, dices):
+        for dice in dices:
+            self.dices.append(dice)
+            
 
 

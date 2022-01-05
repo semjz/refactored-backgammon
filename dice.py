@@ -29,20 +29,17 @@ class Dice:
             self.draw_circle(plain_dice, int(self.width / 6), int(self.height / 6), 4, BLACK)
             self.draw_circle(plain_dice, int(self.width / 2), int(self.height / 2), 4, BLACK)
             self.draw_circle(plain_dice, int(self.width * 5 / 6), int(self.height * 5 / 6), 4, BLACK)
-        
         elif self.dice_num == 4:
             self.draw_circle(plain_dice, int(self.width / 6), int(self.height / 6), 4, BLACK)
             self.draw_circle(plain_dice, int(self.width * 5 / 6), int(self.height / 6), 4, BLACK)
             self.draw_circle(plain_dice, int(self.width / 6), int(self.height * 5 / 6), 4, BLACK)
             self.draw_circle(plain_dice, int(self.width * 5 / 6), int(self.height * 5 / 6), 4, BLACK)
-        
         elif self.dice_num == 5:
             self.draw_circle(plain_dice, int(self.width / 6), int(self.height / 6), 4, BLACK)
             self.draw_circle(plain_dice, int(self.width * 5 / 6), int(self.height / 6), 4, BLACK)
             self.draw_circle(plain_dice, int(self.width / 2), int(self.height / 2), 4, BLACK)
             self.draw_circle(plain_dice, int(self.width / 6), int(self.height * 5 / 6), 4, BLACK)
             self.draw_circle(plain_dice, int(self.width * 5 / 6), int(self.height * 5 / 6), 4, BLACK)
-        
         elif self.dice_num == 6:
             self.draw_circle(plain_dice, int(self.width / 6), int(self.height / 6), 4, BLACK)
             self.draw_circle(plain_dice, int(self.width / 6), int(self.height / 2), 4, BLACK)
