@@ -13,6 +13,7 @@ class Game:
         self.turn_text = self.board.texts[2]
         self.roll_count = 0
         self.roll_dices_btn = self.board.buttons["roll dices"]
+        
 
     def roll_dices_btn_clicked(self, mouse_x, mouse_y):
         return self.roll_dices_btn.collide_with_mouse(mouse_x, mouse_y)
@@ -45,3 +46,6 @@ class Game:
     def reset_btns_color(self):
         for btn in self.board.buttons.values():
             btn.set_color(WHITE)
+
+
+

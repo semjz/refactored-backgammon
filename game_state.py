@@ -5,3 +5,4 @@ class Game_state(Enum):
     SELECT_DEST = auto()
     MOVE = auto()
     PIECE_ON_BAR = auto()
+    

@@ -6,8 +6,8 @@ class Text:
     pygame.init()
     font = pygame.font.SysFont("Arial", 17)
     
-    def __init__(self, text, x, y, env_width, env_height):
-        self.content = text
+    def __init__(self, content, x, y, env_width, env_height):
+        self.content = content
         self.render_content()
         self.x_cord, self.y_cord = x, y
         self.original_x_cord, self.original_y_cord = x, y
@@ -36,7 +36,7 @@ class Text:
 
     def collide_with_mouse(self, x_mouse, y_mouse):
         return self.x_cord < x_mouse < self.x_cord + self.width \
-               and self.y_cord < y_mouse < self.height
+               and self.y_cord < y_mouse < self.y_cord + self.height
 
     def draw(self, surface):
         x_cord, y_cord = self.add_paddings()

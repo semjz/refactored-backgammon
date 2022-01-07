@@ -30,9 +30,12 @@ class Board:
         self.right_play_rect_x, self.right_play_rect_y = self.right_play_rect_cord()
         self.left_play_rect, self.right_play_rect = self.create_play_rects() 
         self.numbers = self.create_numbers()
-        self.texts = self.create_texts()
-        self.buttons = self.create_buttons()
+        self.texts = []
+        self.buttons = {}
         self.dices = self.create_dices()
+        self.create_texts()
+        self.create_buttons()
+        
 
     def left_play_rect_cords(self):
 
@@ -219,7 +222,7 @@ class Board:
             self.draw_triangle(surface, left_side_down_triangle, right_side_down_triangle, color)
         
     def draw_triangle(self, surface, left_side_down_triangle, right_side_down_triangle, color):
-        """Drawing anti aliased polygans first will enhances the triangle quality"""
+        """Drawing anti aliased polygans first, reduces triangle pixelation"""
         # draw anti aliased polygans
         pygame.gfxdraw.aapolygon(surface, left_side_down_triangle, color)
 
@@ -234,13 +237,13 @@ class Board:
         self.draw_top_triangles(surface)
         self.draw_bottom_triangles(surface)
 
-    def set_up_pieces_on_tri(self, tri_num, no_of_pieces, piece_color, pieces_list):
-        x, y = self.triangle_first_piece_centers[tri_num]
+    def set_up_pieces_on_a_tri(self, tri_num, no_of_pieces, piece_color, pieces_list):
+        center_x, center_y = self.triangle_first_piece_centers[tri_num]
         for piece_no in range(no_of_pieces):
             if tri_num < 13:
-                piece = Piece(piece_color, 25, (x, y - piece_no * SQUARE_SIZE), tri_num)
+                piece = Piece(piece_color, 25, (center_x, center_y - piece_no * SQUARE_SIZE), tri_num)
             else:
-                piece = Piece(piece_color, 25, (x, y + piece_no * SQUARE_SIZE), tri_num)
+                piece = Piece(piece_color, 25, (center_x, center_y + piece_no * SQUARE_SIZE), tri_num)
             
             if piece_color == WHITE:
                 self.white_pieces.append(piece)
@@ -254,68 +257,79 @@ class Board:
         
         """Set up white peices """
         # tri 1
-        self.set_up_pieces_on_tri(1, 2, WHITE, pieces)
-        # tri 122
-        self.set_up_pieces_on_tri(12, 5, WHITE, pieces)
+        self.set_up_pieces_on_a_tri(1, 2, WHITE, pieces)
+        # tri 12
+        self.set_up_pieces_on_a_tri(12, 5, WHITE, pieces)
         # tri 17
-        self.set_up_pieces_on_tri(17, 3, WHITE, pieces)
+        self.set_up_pieces_on_a_tri(17, 3, WHITE, pieces)
         # tri 19
-        self.set_up_pieces_on_tri(19, 5, WHITE, pieces)
+        self.set_up_pieces_on_a_tri(19, 5, WHITE, pieces)
 
 
         """set up black peices"""
         # tri 6
-        self.set_up_pieces_on_tri(6, 5, BLACK, pieces)
+        self.set_up_pieces_on_a_tri(6, 5, BLACK, pieces)
         # tri 8
-        self.set_up_pieces_on_tri(8, 3, BLACK, pieces)
+        self.set_up_pieces_on_a_tri(8, 3, BLACK, pieces)
         # tri 13
-        self.set_up_pieces_on_tri(13, 5, BLACK, pieces)
+        self.set_up_pieces_on_a_tri(13, 5, BLACK, pieces)
         # tri 24
-        self.set_up_pieces_on_tri(24, 2, BLACK, pieces)
+        self.set_up_pieces_on_a_tri(24, 2, BLACK, pieces)
         
         return pieces
 
+    def create_button(self, button_x, button_y, button_width, button_height, color, name):
+        self.buttons[name] = Button(button_x, button_y, button_width, button_height, color, name)
+    
     def create_buttons(self):
-        self.buttons = {}
-        button_width = 80
-        button_height = 40
-        x_padding = (self.horizontal_border_size - button_width) / 2
-        y_distance_between_btns = 10
-        button_x = self.horizontal_border_size + self.board_play_area_width + x_padding
-        undo_button_y = HEIGHT / 2 - y_distance_between_btns - button_height
-        draw_button_y = HEIGHT / 2 + y_distance_between_btns 
-        self.buttons["undo"] = Button(button_x, undo_button_y, button_width, button_height, WHITE, "undo")
-        self.buttons["roll dices"] = Button(button_x, draw_button_y, button_width, button_height, WHITE, "roll dices")
+        # button size
+        buttons_width = 80
+        buttons_height = 40
+        
+        # paddings
+        x_padding = (self.horizontal_border_size - buttons_width) / 2
+        distance_between_btns = 10
+        
+        # button cords
+        buttons_x = self.horizontal_border_size + self.board_play_area_width + x_padding
+        undo_button_y = HEIGHT / 2 - distance_between_btns - buttons_height
+        draw_button_y = HEIGHT / 2 + distance_between_btns
 
-        return self.buttons
+        self.create_button(buttons_x, undo_button_y, buttons_width, buttons_height, WHITE, "undo")
+        self.create_button(buttons_x, draw_button_y, buttons_width, buttons_height, WHITE, "roll dices")
+
+
+    def create_text(self, text_content, text_x, text_y, text_env_width, text_env_height):
+
+        text = Text(text_content, text_x, text_y, text_env_width, text_env_height)
+        self.texts.append(text)
 
     def create_texts(self):
-        texts = []
 
-        # White bar text
+        # White bar
+        white_bar_content = "white bar"
         white_bar_text_x = self.horizontal_border_size + self.board_play_rect_width
         white_bar_text_y = HEIGHT - self.vertical_border_size
         white_bar_env_width = self.middle_border_size
         white_bar_env_height = self.vertical_border_size
-        white_bar_text = Text("white bar", white_bar_text_x, white_bar_text_y, white_bar_env_width, white_bar_env_height)
-        texts.append(white_bar_text)
+        self.create_text(white_bar_content, white_bar_text_x, white_bar_text_y, white_bar_env_width, white_bar_env_height)
 
-        # Black bar text
+        # Black bar 
+        Black_bar_content = "black bar"
         Black_bar_text_x = self.horizontal_border_size + self.board_play_rect_width
         Black_bar_text_y = 0
         Black_bar_env_width = self.middle_border_size
         Black_bar_env_height = self.vertical_border_size
-        Black_bar_text = Text("black bar", Black_bar_text_x, Black_bar_text_y, Black_bar_env_width, Black_bar_env_height)
-        texts.append(Black_bar_text)
+        self.create_text(Black_bar_content, Black_bar_text_x, Black_bar_text_y, Black_bar_env_width, Black_bar_env_height)
 
+        # turn
+        turn_content = "turn: "
         turn_text_x = 0
         turn_text_y = 0
         turn_text_env_width = self.horizontal_border_size
         turn_text_env_height = HEIGHT / 2
-        turn_text = Text("turn:", turn_text_x, turn_text_y, turn_text_env_width, turn_text_env_height)
-        texts.append(turn_text)
+        self.create_text(turn_content, turn_text_x, turn_text_y, turn_text_env_width, turn_text_env_height)
 
-        return texts
 
     def draw_background(self, surface):
         surface.fill(GRAY)
@@ -349,7 +363,7 @@ class Board:
 
     def draw_buttons(self, surface):
         for btn in self.buttons.values():
-            btn.draw(surface, btn.name)
+            btn.draw(surface)
 
     def create_dices(self):
         dices = []
@@ -389,6 +403,9 @@ class Board:
         piece_y = self.vertical_border_size  - SQUARE_SIZE
         for piece_no in range(len(self.black_pieces_holder_list)):            
             pygame.draw.rect(surface, BLACK, (piece_x, piece_y - piece_no * 12, 50, 10))
+
+    
+
 
     def draw_board(self, surface):
         
