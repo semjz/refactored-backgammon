@@ -21,7 +21,6 @@ class Piece:
 
     def collide_with_mouse(self, x, y):
         distnace_to_piece_center = math.sqrt(math.pow(x - self.center_x, 2) + math.pow(y - self.center_y, 2))
-        print(distnace_to_piece_center) 
         if distnace_to_piece_center < self.radius:
             return True
         else:

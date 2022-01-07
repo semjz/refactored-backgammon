@@ -67,7 +67,7 @@ class Game:
 
     def update_board(self, surface):
         self.board.draw_board(surface)
-        if self.roll_count != 0:
+        if self.dice_rolled:
             self.draw_dices(surface)
         pygame.display.update()
 
