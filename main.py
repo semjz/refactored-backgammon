@@ -17,25 +17,41 @@ def main():
     while running:
         clock.tick(FPS)
 
-        for event in pygame.event.get():
-            pos = pygame.mouse.get_pos()
-            x_mouse, y_mouse = pos[0], pos[1]
-            
+        for event in pygame.event.get():            
             if event.type == pygame.QUIT:
                 running = False
 
             if event.type == pygame.MOUSEBUTTONDOWN:
-                if game.state == Game_state.DECIDE_TURNS and game.roll_dices_btn_clicked(x_mouse, y_mouse):
-                    game.roll_dices()
-                    if game.roll_count == 0:
-                        sum_of_first_roll = game.sum_of_dice_nums()
-                    else:
-                        sum_of_second_roll = game.sum_of_dice_nums()
-                    game.roll_count += 1
-                    if game.roll_count == 2:
-                        game.decide_turns(sum_of_first_roll, sum_of_second_roll)
-                        game.turn_text.set_content(f"turn: {game.turn}")
-                        game.state = Game_state.SELECT_ORIGIN
+
+                if game.state == Game_state.DECIDE_TURNS:
+                    """Decide the turns adter 2 roll out"""
+                    pos = pygame.mouse.get_pos()
+                    x_mouse, y_mouse = pos[0], pos[1]
+
+                    if game.roll_dices_btn_clicked(x_mouse, y_mouse):
+                        game.roll_single_dice(game.roll_count + 1)
+                        game.roll_count += 1
+                        
+                        if game.roll_count == 2:
+                            if game.decide_turns():
+                                game.turn_text.set_content(f"turn: {game.turn}")
+                                game.state = Game_state.SELECT_ORIGIN
+                            else:
+                                game.roll_count = 0
+                        
+                    break # break so that new x and y positions are used for next game state.
+
+                if game.state == Game_state.SELECT_ORIGIN:
+                    pos = pygame.mouse.get_pos()
+                    x_mouse, y_mouse = pos[0], pos[1]
+                    
+                    if game.dice_rolled:
+                        game.select_origin(x_mouse, y_mouse)
+                        if game.selected_origin:
+                            game.state = Game_state.SELECT_DEST
+                    
+                    if game.roll_dices_btn_clicked(x_mouse, y_mouse):
+                        game.roll_dices()
 
             if event.type == pygame.MOUSEBUTTONUP:
                 game.reset_btns_color()

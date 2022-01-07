@@ -14,7 +14,6 @@ class Button:
         self.height = height
         self.text = Text(name, self.top_left_x, self.top_left_y, self.width, self.height)
         self.color = color
-        self.clicked = False
 
     def draw(self, surface):
         # draw button
