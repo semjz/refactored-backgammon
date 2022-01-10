@@ -32,6 +32,9 @@ class Piece:
     def dehighlight(self):
         self.highlighted = False
 
+    def get_color(self):
+        return self.color
+
     
 
 

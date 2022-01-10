@@ -5,6 +5,7 @@ from number import Number
 from button import Button
 from dice import Dice
 from text import Text 
+from triangle import Triangle
 from constants import *
 
 
@@ -30,11 +31,14 @@ class Board:
         self.right_play_rect_x, self.right_play_rect_y = self.right_play_rect_cord()
         self.left_play_rect, self.right_play_rect = self.create_play_rects() 
         self.numbers = self.create_numbers()
+        self.triangles = []
         self.texts = []
         self.buttons = {}
         self.dices = self.create_dices()
         self.create_texts()
         self.create_buttons()
+        self.create_top_triangles()
+        self.create_bottom_triangles()
         
 
     def left_play_rect_cords(self):
@@ -162,29 +166,38 @@ class Board:
         
         # left side triangle cords
         a = (first_point_x_cord , first_point_y_cord)
-        b = (first_point_x_cord + SQUARE_SIZE, first_point_y_cord)
-        c = (middle_point_x_cord , middle_point_y_cord)
+        b = (middle_point_x_cord , middle_point_y_cord)
+        c = (first_point_x_cord + SQUARE_SIZE, first_point_y_cord)
+
         # left side triangle to be drawn
         left_side_down_triangle = [a, b , c]
 
         # right side triangle cords
         a1 = (first_point_x_cord + 6 * SQUARE_SIZE + self.middle_border_size, first_point_y_cord)
-        b1 = (first_point_x_cord + 7 * SQUARE_SIZE + self.middle_border_size, first_point_y_cord)
-        c1 = (middle_point_x_cord + 6 * SQUARE_SIZE + self.middle_border_size, middle_point_y_cord)
+        b1 = (middle_point_x_cord + 6 * SQUARE_SIZE + self.middle_border_size, middle_point_y_cord)
+        c1 = (first_point_x_cord + 7 * SQUARE_SIZE + self.middle_border_size, first_point_y_cord)
+
         # right side triangle to be drawn
         right_side_down_triangle = [a1, b1, c1]
 
         return left_side_down_triangle, right_side_down_triangle
 
-    def draw_bottom_triangles(self, surface):
+    def create_bottom_triangles(self):
+        left_tri_num = 12
+        right_tri_num = 1
         for no_of_squares_from_left in range(6):
             if no_of_squares_from_left % 2 == 0:
                 color = DARK_ORANGE3 
             else:
                 color = TAN
-            left_side_down_triangle, right_side_down_triangle = self.calc_bottom_triangle_cord(no_of_squares_from_left)
-            
-            self.draw_triangle(surface, left_side_down_triangle, right_side_down_triangle, color)
+            left_side_tri_cords, right_side_tri_cords = self.calc_bottom_triangle_cord(no_of_squares_from_left)
+            left_tri = Triangle(left_side_tri_cords, color, left_tri_num)
+            right_tri = Triangle(right_side_tri_cords, color, right_tri_num)
+            self.triangles.append(left_tri)
+            self.triangles.append(right_tri)
+
+            left_tri_num -= 1
+            right_tri_num += 1
 
 
     def calc_top_triangles_cords(self, no_of_squares_from_left):
@@ -196,46 +209,43 @@ class Board:
 
         # left side triangle cords
         a = (first_point_x_cord , first_point_y_cord)
-        b = (first_point_x_cord + SQUARE_SIZE, first_point_y_cord)
-        c = (middle_point_x_cord, middle_point_y_cord)
+        b = (middle_point_x_cord, middle_point_y_cord)
+        c = (first_point_x_cord + SQUARE_SIZE, first_point_y_cord)
+
         # left side triangle to be drawn
         left_side_down_triangle = [a, b , c]
 
         # right side triangle cords
         a1 = (first_point_x_cord + 6 * SQUARE_SIZE + self.middle_border_size, first_point_y_cord)
-        b1 = (first_point_x_cord + 7 * SQUARE_SIZE + self.middle_border_size, first_point_y_cord)
-        c1 = (middle_point_x_cord + 6 * SQUARE_SIZE + self.middle_border_size, middle_point_y_cord)
+        b1 = (middle_point_x_cord + 6 * SQUARE_SIZE + self.middle_border_size, middle_point_y_cord)
+        c1 = (first_point_x_cord + 7 * SQUARE_SIZE + self.middle_border_size, first_point_y_cord)
+
         # right side triangle to be drawn
         right_side_down_triangle = [a1, b1, c1]
 
         return left_side_down_triangle, right_side_down_triangle
 
-    def draw_top_triangles(self, surface):
+    def create_top_triangles(self):
+        left_tri_num = 13
+        right_tri_num = 24
         for no_of_squares_from_left in range(6):
             if no_of_squares_from_left % 2 == 0:
                 color = TAN
             else:
                 color = DARK_ORANGE3
+            left_side_tri_cords, right_side_tri_cords = self.calc_top_triangles_cords(no_of_squares_from_left)
+            left_tri = Triangle(left_side_tri_cords, color, left_tri_num)
+            right_tri = Triangle(right_side_tri_cords, color, right_tri_num)
+            self.triangles.append(left_tri)
+            self.triangles.append(right_tri)
 
-            left_side_down_triangle, right_side_down_triangle = self.calc_top_triangles_cords(no_of_squares_from_left)
-
-            self.draw_triangle(surface, left_side_down_triangle, right_side_down_triangle, color)
+            left_tri_num += 1
+            right_tri_num -= 1
         
-    def draw_triangle(self, surface, left_side_down_triangle, right_side_down_triangle, color):
-        """Drawing anti aliased polygans first, reduces triangle pixelation"""
-        # draw anti aliased polygans
-        pygame.gfxdraw.aapolygon(surface, left_side_down_triangle, color)
-
-        pygame.gfxdraw.aapolygon(surface, right_side_down_triangle, color)
-
-        # draw filled polygans
-        pygame.gfxdraw.filled_polygon(surface, left_side_down_triangle, color)
-        
-        pygame.gfxdraw.filled_polygon(surface, right_side_down_triangle, color)
-
     def draw_all_triangles(self, surface):
-        self.draw_top_triangles(surface)
-        self.draw_bottom_triangles(surface)
+        for tri in self.triangles:
+            tri.draw(surface)
+
 
     def set_up_pieces_on_a_tri(self, tri_num, no_of_pieces, piece_color, pieces_list):
         center_x, center_y = self.triangle_first_piece_centers[tri_num]
