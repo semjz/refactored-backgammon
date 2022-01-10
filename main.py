@@ -54,7 +54,7 @@ def main():
                 elif game.roll_dices_btn_clicked(x_mouse, y_mouse):
                     game.roll_dices()
 
-                break
+                break # break so that next state uses new mouse cords. 
 
             if event.type == pygame.MOUSEBUTTONDOWN and game.state == Game_state.SELECT_DEST:
                 pos = pygame.mouse.get_pos()
@@ -62,6 +62,7 @@ def main():
 
                 game.select_dest(x_mouse, y_mouse)
                 if game.selected_dest:
+                    print(game.selected_origin, game.selected_dest)
                     print(game.is_valid_move())
 
 

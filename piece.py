@@ -35,6 +35,9 @@ class Piece:
     def get_color(self):
         return self.color
 
+    def get_tri_num(self):
+        return self.tri_num
+
     
 
 

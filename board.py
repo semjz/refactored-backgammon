@@ -239,8 +239,8 @@ class Board:
             self.triangles.append(left_tri)
             self.triangles.append(right_tri)
 
-            left_tri_num -= 1
-            right_tri_num -= 1
+            left_tri_num += 1
+            right_tri_num += 1
         
     def draw_all_triangles(self, surface):
         for tri in self.triangles:
