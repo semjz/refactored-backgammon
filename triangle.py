@@ -4,14 +4,12 @@ from shapely.geometry import Point, Polygon
 class Triangle:
     def __init__(self, cords, color, num):
         self.cords = cords
-        self.first_point = cords[0]
-        self.middle_point = cords[1]
-        self.last_point = cords[2]
         self.poly_obj = Polygon(cords)
         self.color = color
         self.num = num
 
     def draw(self, surface):
+        """drawing an anti aliased polygon reduces pixelation"""
         pygame.gfxdraw.aapolygon(surface, self.cords, self.color)
         pygame.gfxdraw.filled_polygon(surface, self.cords, self.color)
 
@@ -21,3 +19,4 @@ class Triangle:
 
     def get_num(self):
         return self.num
+

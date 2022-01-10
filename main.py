@@ -60,7 +60,8 @@ def main():
                 pos = pygame.mouse.get_pos()
                 x_mouse, y_mouse = pos[0], pos[1]
 
-                if game.select_dest(x_mouse, y_mouse):
+                game.select_dest(x_mouse, y_mouse)
+                if game.selected_dest:
                     print(game.is_valid_move())
 
 

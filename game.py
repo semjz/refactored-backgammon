@@ -68,11 +68,12 @@ class Game:
             self.distnace_left_to_move = dices[0].get_num() + dices[1].get_num()
         
     def select_origin(self, mouse_x, mouse_y):
+        self.selected_origin = None
+
         if self.turn == "black":
             pieces = self.board.black_pieces
         else:
             pieces = self.board.white_pieces
-        
         
         for piece in pieces:
             if piece.collide_with_mouse(mouse_x, mouse_y):
@@ -82,31 +83,14 @@ class Game:
                 self.selected_origin = selected_tri_num
                 break
 
-    def select_dest(self, mouse_x, mouse_y):        
-        start = timer()
+    def select_dest(self, mouse_x, mouse_y):
+        self.selected_dest = None
+
         for tri in self.board.triangles:
             if tri.collide_with_mouse(mouse_x, mouse_y):
                 self.selected_dest = tri.get_num()
                 break
                 
-        end = timer()
-        print(f"{end - start:0.4f} seconds")
-
-
-    def check_collision_with_piece(self, mouse_x, mouse_y):
-        if self.turn == "black":
-            pieces = self.board.black_pieces
-        else:
-            pieces = self.board.white_pieces
-        
-        for piece in pieces:
-            if piece.collide_with_mouse(mouse_x, mouse_y):
-                selected_tri_num = piece.tri_num
-                selected_piece = self.board.pieces[selected_tri_num][-1]
-                selected_piece.highlight()
-                self.selected_origin = selected_tri_num
-                break
-        
 
     def roll_dices_btn_clicked(self, mouse_x, mouse_y):
         return self.roll_dices_btn.collide_with_mouse(mouse_x, mouse_y)

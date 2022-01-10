@@ -184,7 +184,7 @@ class Board:
 
     def create_bottom_triangles(self):
         left_tri_num = 12
-        right_tri_num = 1
+        right_tri_num = 6
         for no_of_squares_from_left in range(6):
             if no_of_squares_from_left % 2 == 0:
                 color = DARK_ORANGE3 
@@ -197,7 +197,7 @@ class Board:
             self.triangles.append(right_tri)
 
             left_tri_num -= 1
-            right_tri_num += 1
+            right_tri_num -= 1
 
 
     def calc_top_triangles_cords(self, no_of_squares_from_left):
@@ -227,7 +227,7 @@ class Board:
 
     def create_top_triangles(self):
         left_tri_num = 13
-        right_tri_num = 24
+        right_tri_num = 19
         for no_of_squares_from_left in range(6):
             if no_of_squares_from_left % 2 == 0:
                 color = TAN
@@ -239,7 +239,7 @@ class Board:
             self.triangles.append(left_tri)
             self.triangles.append(right_tri)
 
-            left_tri_num += 1
+            left_tri_num -= 1
             right_tri_num -= 1
         
     def draw_all_triangles(self, surface):
