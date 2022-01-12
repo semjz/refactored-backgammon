@@ -2,135 +2,129 @@ import pygame
 from board import Board
 from text import Text
 from game_state import Game_state
+from board_area import Board_area
 from constants import *
 from timeit import default_timer as timer
 
-
-
 class Game:
+
     def __init__(self):
         self.board = Board()
         self.state = Game_state.DECIDE_TURNS
         self.dice_rolled = False
-        self.double_dice_rolled = False
+        self.double_dice_is_rolled = False
         self.turn = ""
         self.turn_text = self.board.texts[2]
         self.roll_count = 0
         self.roll_dices_btn = self.board.buttons["roll dices"]
         self.selected_origin = None
         self.selected_dest = None
+        self.move_distance = 0
+        self.move_direction = None
         self.valid_moves = []
         self.no_of_moves_left = 0
         self.distnace_left_to_move = 0
+        self.legal_path_double_move = [0,0]
 
-    def sum_of_dices_face(self):
-        return self.board.dices[0].get_num() + self.board.dices[1].get_num()
+    def change_turn(self):
+        if self.turn == "white":
+            self.turn = "black"
+        else:
+            self.turn = "white"
 
-    def is_valid_move(self):
-        distance_to_move = abs(self.selected_dest - self.selected_origin)
+    def move_on_board(self):
+        piece_to_be_moved = self.board.pieces[self.selected_origin].pop()
+        dest_pieces_list = self.board.pieces[self.selected_dest]
+        dest_x, dest_first_piece_y = self.board.triangle_first_piece_centers[self.selected_dest]
+    
+        if self.move_is_hit(piece_to_be_moved):
+            self.place_piece_on_mid_bar(piece_to_be_moved)
+        
+        if not self.double_dice_is_rolled:
+            self.valid_moves.remove(self.move_distance)
+            
+        self.no_of_moves_left -= 1
+        if self.no_of_moves_left == 0:
+            self.dice_rolled = False
+        
+        dest_y = self.calc_dest_piece_y(dest_pieces_list, dest_first_piece_y)
+        piece_to_be_moved.set_tri_num(self.selected_dest)
+        piece_to_be_moved.set_center(dest_x, dest_y)
+        piece_to_be_moved.dehighlight()
+        dest_pieces_list.append(piece_to_be_moved)
 
-        # Check the direction of move is legal
-        if not self.legal_move_direction(distance_to_move):
-            return False
-        # move is valid and same numbers are rolled.
-        if distance_to_move in self.valid_moves and self.double_dice_rolled:
-            return self.legal_moves_double_dice(distance_to_move)
-        # move is valid and different numbers are rolled.
-        if distance_to_move in self.valid_moves and not self.double_dice_rolled:
-            # when player moves sum of dices.
-            if distance_to_move == self.sum_of_dice_nums():
-                # if either combination of moves is legal then the whole move is legal.
-                if not self.legal_double_moves_single_dice(self.board.dices[0], self.board.dices[1]):
-                    return self.legal_double_moves_single_dice(self.board.dices[1], self.board.dices[0])
-                else:
-                    return True
-            else:
-                # when player makes a noram single move.
-                return self.dest_pieces_legal_for_move(self.selected_dest)
 
-        return False
+    def move_is_hit(self, piece_to_be_moved):
+        if len(self.board.pieces[self.selected_dest]) == 1:
+            dest_piece = self.board.pieces[self.selected_dest][-1]
+            return piece_to_be_moved.get_color() != dest_piece.get_color()
+
+
+    def calc_dest_piece_y(self, dest_pieces_list, dest_first_piece_y):
+        if self.selected_dest < 13:
+            dest_first_piece_y -= len(dest_pieces_list) * 50
+        else:
+            dest_first_piece_y += len(dest_pieces_list) * 50
+        return dest_first_piece_y
+
+    def place_piece_on_mid_bar(self, piece):
+        dest_x = WIDTH / 2
+        if piece.get_color() == WHITE:
+            base_dest_y = HEIGHT - self.board.vertical_border_size -25
+            dest_y = base_dest_y - len(self.board.white_pieces_on_mid_bar) * 50
+            piece.set_center(dest_x, dest_y)
+            self.board.white_pieces_on_mid_bar.append(piece)
+        else:
+            base_dest_y = self.board.vertical_border_size + 25
+            dest_y = base_dest_y + len(self.board.black_pieces_on_mid_bar) * 50
+            piece.set_center(dest_x, dest_y)
+            self.board.black_pieces_on_mid_bar.append(piece)
+        
+
+    def piece_on_mid_bar(self):
+        pieces_on_mid_bar = self.board.white_pieces_on_mid_bar + self.board.black_pieces_on_mid_bar
+        return pieces_on_mid_bar
+
+    def is_valid_move_on_board(self):
+
+        # when same numbers are rolled.
+        if self.double_dice_is_rolled:
+            if self.legal_move_direction() and self.move_is_valid_based_on_dices():
+                return self.check_moves_legal_double_dice()
+        
+        # when different numbers are rolled.
+        elif self.legal_move_direction() and self.move_is_valid_based_on_dices():
+            return self.check_legal_move_based_on_dest_pieces(self.selected_dest)
+
+    def move_is_valid_based_on_dices(self):
+        return self.move_distance in self.valid_moves
+
 
     # white only moves clockwise and black anti clockwise.
-    def legal_move_direction(self, distance_to_move):
-        distance_to_move = self.selected_dest - self.selected_origin
+    def legal_move_direction(self):
         current_piece = self.board.pieces[self.selected_origin][-1]
-        if current_piece.get_color() == WHITE and distance_to_move > 0:
+        if current_piece.get_color() == WHITE and self.move_direction == CLOCK_WISE:
             return True
-        if current_piece.get_color() == BLACK and distance_to_move < 0:
+        if current_piece.get_color() == BLACK and self.move_direction == ANTI_CLOCK_WISE:
             return True
         return False
-    
-    # check if multiple moves made by player is legal when same numbers are rolled.
-    def legal_moves_double_dice(self, distance_to_move):
-        origin = self.selected_origin
-        current_piece = self.board.pieces[self.selected_origin][-1]
-        no_of_moves = distance_to_move / self.board.dices[0]
-        if no_of_moves > self.no_of_moves_left:
-            return False
-        
-        if current_piece.get_color() == WHITE:
-            dest = origin + self.board.dices[0]
-        else:
-            dest = origin - self.board.dices[0]
-
-        # check legality of in-between moves.
-        for i in range(no_of_moves):
-            if not self.dest_pieces_legal_for_move(dest):
-                return False
-            origin += self.board.dices[0]
-            dest += self.board.dices[0]
-
-        self.no_of_moves_left -= no_of_moves
-
-        return True
-
-    # check if a double move made is legal when differnt numbers are rolled.
-    def legal_double_moves_single_dice(self, first_dice, second_dice):
-        origin = self.selected_origin
-        current_piece = self.board.pieces[self.selected_origin][-1]
-        
-        # check if both moves are legal, if any of them are illegal
-        # whole move is illegal.
-
-        if current_piece.get_color() == WHITE:
-            dest = origin + first_dice.get_num()
-        else:
-            dest = origin - first_dice.get_num()
-        
-        print(origin, dest)
-        
-        if not self.dest_pieces_legal_for_move(dest):
-            return False
-        
-        origin = dest
-        
-        if current_piece.get_color() == WHITE:
-            dest = origin + second_dice.get_num()
-        else:
-            dest = origin - second_dice.get_num()
-
-        print(origin, dest)
-
-        if not self.dest_pieces_legal_for_move(dest):
-            return False
-                
-        return True
 
     # a piece can't move on a triangle with more than 1 piece
     # of different color.
-    def dest_pieces_legal_for_move(self, dest):
+    def check_legal_move_based_on_dest_pieces(self, dest):
         current_piece = self.board.pieces[self.selected_origin][-1]
         dest_pieces = self.board.pieces[dest]
-        
+            
         # if destination triangle has one or no piece, move is legal
         if len(dest_pieces) in (0,1):
             return True
-        dest_piece = dest_pieces[-1]
         
         # if there are more than 1 piece at destination, move is legal if color 
         # of current piece and destination triangle pieces are same.
-        if len(dest_pieces) > 1 and current_piece.get_color() == dest_piece.get_color():
-            return True
+        else:
+            dest_piece = dest_pieces[-1]
+            if current_piece.get_color() == dest_piece.get_color():
+                return True
         
         return False
 
@@ -145,9 +139,9 @@ class Game:
         dices = self.board.dices
        
         if self.double_dice_rolled:
-            self.valid_moves = [dices[0].get_num() * i for i in range(1,5)]
+            self.valid_moves = [dices[0].get_num()]
         else:
-            self.valid_moves = [dices[0].get_num(), dices[1].get_num(), self.sum_of_dices_face()]
+            self.valid_moves = [dices[0].get_num(), dices[1].get_num()]
 
     # if same numbers are rolled, player can make 4 moves.
     def set_no_of_moves(self):
@@ -233,9 +227,17 @@ class Game:
             else:
                 self.turn = "black"
             return True
-        
-    def sum_of_dice_nums(self):
-        return self.board.dices[0].get_num() + self.board.dices[1].get_num()
+    
+    def get_no_of_moves_left(self):
+        return self.no_of_moves_left
+
+    def set_move_distance_and_direction(self):
+        displacment = self.selected_dest - self.selected_origin
+        if displacment > 0:
+            self.move_direction = CLOCK_WISE
+        else:
+            self.move_direction = ANTI_CLOCK_WISE
+        self.move_distance = abs(self.selected_dest - self.selected_origin)
 
     def update_board(self, surface):
         self.board.draw_board(surface)

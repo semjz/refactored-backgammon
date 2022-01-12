@@ -8,8 +8,7 @@ from text import Text
 from triangle import Triangle
 from constants import *
 
-
-class Board:
+class Board():
 
     def __init__(self):
         self.board_play_rect_width = 6 * SQUARE_SIZE
@@ -21,8 +20,8 @@ class Board:
         self.white_pieces = []
         self.triangle_first_piece_centers = self.set_tris_first_piece_centers()
         self.pieces = self.create_pieces_list()
-        self.white_pieces_in_mid = []
-        self.black_pieces_in_mid = []
+        self.white_pieces_on_mid_bar = []
+        self.black_pieces_on_mid_bar = []
         self.white_pieces_holder_list = []
         self.black_pieces_holder_list = []
         self.white_pieces_holder = pygame.Rect(0, 0, 0, 0)
@@ -39,8 +38,7 @@ class Board:
         self.create_buttons()
         self.create_top_triangles()
         self.create_bottom_triangles()
-        
-
+    
     def left_play_rect_cords(self):
 
         left_play_rect_x = self.horizontal_border_size
@@ -391,10 +389,10 @@ class Board:
         return dices   
 
     def draw_pieces_in_mid(self, surface):
-        for piece in self.white_pieces_in_mid:
+        for piece in self.white_pieces_on_mid_bar:
             piece.draw_piece(surface)
         
-        for piece in self.black_pieces_in_mid:
+        for piece in self.black_pieces_on_mid_bar:
             piece.draw_piece(surface)
 
     def draw_pieces(self, surface):
@@ -413,9 +411,6 @@ class Board:
         piece_y = self.vertical_border_size  - SQUARE_SIZE
         for piece_no in range(len(self.black_pieces_holder_list)):            
             pygame.draw.rect(surface, BLACK, (piece_x, piece_y - piece_no * 12, 50, 10))
-
-    
-
 
     def draw_board(self, surface):
         

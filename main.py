@@ -61,10 +61,17 @@ def main():
                 x_mouse, y_mouse = pos[0], pos[1]
 
                 game.select_dest(x_mouse, y_mouse)
-                if game.selected_dest:
-                    print(game.selected_origin, game.selected_dest)
-                    print(game.is_valid_move())
+                game.set_move_distance_and_direction()
+                if game.selected_dest and game.is_valid_move_on_board():
+                    game.state = Game_state.MOVE
+                    
 
+            if event.type == pygame.MOUSEBUTTONDOWN and game.state == Game_state.MOVE:
+                game.move_on_board()
+                game.state = Game_state.SELECT_ORIGIN
+                if game.no_of_moves_left == 0:
+                    game.change_turn()
+                    game.turn_text.set_content(f"turn: {game.turn}")
 
             if event.type == pygame.MOUSEBUTTONUP:
                 game.reset_btns_color()
