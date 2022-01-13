@@ -331,7 +331,7 @@ class Board():
         self.create_text(Black_bar_content, Black_bar_text_x, Black_bar_text_y, Black_bar_env_width, Black_bar_env_height)
 
         # turn
-        turn_content = "turn: "
+        turn_content = ""
         turn_text_x = 0
         turn_text_y = 0
         turn_text_env_width = self.horizontal_border_size

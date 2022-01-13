@@ -4,18 +4,16 @@ from text import Text
 from game_state import Game_state
 from board_area import Board_area
 from constants import *
-from timeit import default_timer as timer
 
 class Game:
 
     def __init__(self):
         self.board = Board()
         self.state = Game_state.DECIDE_TURNS
-        self.dice_rolled = False
+        self.dice_is_rolled = False
         self.double_dice_is_rolled = False
         self.turn = ""
         self.turn_text = self.board.texts[2]
-        self.roll_count = 0
         self.roll_dices_btn = self.board.buttons["roll dices"]
         self.selected_origin = None
         self.selected_dest = None
@@ -24,7 +22,6 @@ class Game:
         self.valid_moves = []
         self.no_of_moves_left = 0
         self.distnace_left_to_move = 0
-        self.legal_path_double_move = [0,0]
 
     def change_turn(self):
         if self.turn == "white":
@@ -38,16 +35,19 @@ class Game:
         dest_x, dest_first_piece_y = self.board.triangle_first_piece_centers[self.selected_dest]
     
         if self.move_is_hit(piece_to_be_moved):
-            self.place_piece_on_mid_bar(piece_to_be_moved)
+            dest_piece = dest_pieces_list.pop()
+            self.place_piece_on_mid_bar(dest_piece)
+
         
         if not self.double_dice_is_rolled:
             self.valid_moves.remove(self.move_distance)
             
         self.no_of_moves_left -= 1
         if self.no_of_moves_left == 0:
-            self.dice_rolled = False
+            self.dice_is_rolled = False
+            self.double_dice_is_rolled = False
         
-        dest_y = self.calc_dest_piece_y(dest_pieces_list, dest_first_piece_y)
+        dest_y = self.calc_piece_dest_y(dest_pieces_list, dest_first_piece_y)
         piece_to_be_moved.set_tri_num(self.selected_dest)
         piece_to_be_moved.set_center(dest_x, dest_y)
         piece_to_be_moved.dehighlight()
@@ -60,7 +60,7 @@ class Game:
             return piece_to_be_moved.get_color() != dest_piece.get_color()
 
 
-    def calc_dest_piece_y(self, dest_pieces_list, dest_first_piece_y):
+    def calc_piece_dest_y(self, dest_pieces_list, dest_first_piece_y):
         if self.selected_dest < 13:
             dest_first_piece_y -= len(dest_pieces_list) * 50
         else:
@@ -81,24 +81,17 @@ class Game:
             self.board.black_pieces_on_mid_bar.append(piece)
         
 
-    def piece_on_mid_bar(self):
+    def is_any_piece_on_mid_bar(self):
         pieces_on_mid_bar = self.board.white_pieces_on_mid_bar + self.board.black_pieces_on_mid_bar
         return pieces_on_mid_bar
 
     def is_valid_move_on_board(self):
-
-        # when same numbers are rolled.
-        if self.double_dice_is_rolled:
-            if self.legal_move_direction() and self.move_is_valid_based_on_dices():
-                return self.check_moves_legal_double_dice()
-        
-        # when different numbers are rolled.
-        elif self.legal_move_direction() and self.move_is_valid_based_on_dices():
+        if self.legal_move_direction() and self.move_is_valid_based_on_dices():
             return self.check_legal_move_based_on_dest_pieces(self.selected_dest)
+        return False
 
     def move_is_valid_based_on_dices(self):
         return self.move_distance in self.valid_moves
-
 
     # white only moves clockwise and black anti clockwise.
     def legal_move_direction(self):
@@ -109,50 +102,47 @@ class Game:
             return True
         return False
 
-    # a piece can't move on a triangle with more than 1 piece
-    # of different color.
     def check_legal_move_based_on_dest_pieces(self, dest):
         current_piece = self.board.pieces[self.selected_origin][-1]
         dest_pieces = self.board.pieces[dest]
             
-        # if destination triangle has one or no piece, move is legal
+        # if destination triangle has one or no piece, move is legal.
         if len(dest_pieces) in (0,1):
             return True
         
-        # if there are more than 1 piece at destination, move is legal if color 
-        # of current piece and destination triangle pieces are same.
+        # if there are more than 1 piece at destination, move is legal if 
+        # current and destination pieces have same color.
         else:
             dest_piece = dest_pieces[-1]
             if current_piece.get_color() == dest_piece.get_color():
                 return True
-        
-        return False
+            return False
 
     # check if a double dice is rolled.
-    def set_double_dice_rolled(self):
+    def set_double_dice_is_rolled(self):
         if self.board.dices[0].get_num() == self.board.dices[1].get_num():
-            self.double_dice_rolled = True
+            self.double_dice_is_rolled = True
         else:
-            self.double_dice_rolled = False
+            self.double_dice_is_rolled = False
 
     def set_valid_moves(self):
         dices = self.board.dices
        
-        if self.double_dice_rolled:
+        if self.double_dice_is_rolled:
             self.valid_moves = [dices[0].get_num()]
         else:
             self.valid_moves = [dices[0].get_num(), dices[1].get_num()]
 
     # if same numbers are rolled, player can make 4 moves.
     def set_no_of_moves(self):
-        if self.double_dice_rolled:
+        if self.double_dice_is_rolled:
             self.no_of_moves_left = 4
         else:
             self.no_of_moves_left = 2
 
     def set_distnace_left_to_move(self):
         dices = self.board.dices
-        if self.double_dice_rolled:
+        if self.double_dice_is_rolled:
             self.distnace_left_to_move = 4 * dices[0].get_num()
         else:
             self.distnace_left_to_move = dices[0].get_num() + dices[1].get_num()
@@ -192,21 +182,21 @@ class Game:
     def roll_dices(self):
         for dice in self.board.dices:
             dice.roll()
-        self.dice_rolled = True
+        self.dice_is_rolled = True
         self.roll_dices_btn.set_color(TAN)
         self.set_move_info()
 
     # check if a double dice is rolled, set valid moves and number of moves
     # and distance left to move.
     def set_move_info(self):
-        self.set_double_dice_rolled()
+        self.set_double_dice_is_rolled()
         self.set_valid_moves()
         self.set_no_of_moves()
         self.set_distnace_left_to_move()
 
     def roll_single_dice(self, dice_no):
         self.board.dices[dice_no - 1].roll()
-        self.dice_rolled = True
+        self.dice_is_rolled = True
         self.roll_dices_btn.set_color(TAN)
 
     def draw_dices(self, surface):
@@ -241,7 +231,7 @@ class Game:
 
     def update_board(self, surface):
         self.board.draw_board(surface)
-        if self.dice_rolled:
+        if self.dice_is_rolled:
             self.draw_dices(surface)
         pygame.display.update()
 
