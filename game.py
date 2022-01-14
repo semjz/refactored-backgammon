@@ -15,6 +15,7 @@ class Game:
         self.turn = ""
         self.turn_text = self.board.texts[2]
         self.roll_dices_btn = self.board.buttons["roll dices"]
+        self.undo_btn = self.board.buttons["undo"]
         self.selected_origin = None
         self.selected_dest = None
         self.move_distance = 0
@@ -86,6 +87,7 @@ class Game:
         return pieces_on_mid_bar
 
     def is_valid_move_on_board(self):
+        self.set_move_distance_and_direction()
         if self.legal_move_direction() and self.move_is_valid_based_on_dices():
             return self.check_legal_move_based_on_dest_pieces(self.selected_dest)
         return False
@@ -162,7 +164,8 @@ class Game:
                 selected_piece = self.board.pieces[piece.get_tri_num()][-1]
                 selected_piece.highlight()
                 self.selected_origin = piece.get_tri_num()
-                break
+                return True
+        return False
 
     def select_dest(self, mouse_x, mouse_y):
         self.selected_dest = None
@@ -172,11 +175,14 @@ class Game:
         for tri in self.board.triangles:
             if tri.collide_with_mouse(mouse_x, mouse_y):
                 self.selected_dest = tri.get_num()
-                break
-                
+                return True
+        return False                
 
     def roll_dices_btn_clicked(self, mouse_x, mouse_y):
         return self.roll_dices_btn.collide_with_mouse(mouse_x, mouse_y)
+
+    def undo_btn_clicked(self, mouse_x, mouse_y):
+        return self.undo_btn.collide_with_mouse(mouse_x, mouse_y)
 
     # roll dices and set move info.
     def roll_dices(self):
@@ -185,6 +191,13 @@ class Game:
         self.dice_is_rolled = True
         self.roll_dices_btn.set_color(TAN)
         self.set_move_info()
+    
+    def deselect_origin(self):
+        self.undo_btn.set_color(TAN)
+        selected_piece = self.board.pieces[self.selected_origin][-1]
+        selected_piece.dehighlight()
+        self.selected_origin = None
+
 
     # check if a double dice is rolled, set valid moves and number of moves
     # and distance left to move.

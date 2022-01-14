@@ -31,13 +31,13 @@ def main():
                     roll_count += 1
                 
                 """Decide the turns after 2 roll out"""
-                if roll_count == 2:
-                    if game.decide_turns():
-                        game.turn_text.set_content(f"turn: {game.turn}")
-                        game.state = Game_state.SELECT_ORIGIN
-                        game.set_move_info()
-                    else:
-                        roll_count = 0
+                if roll_count == 2 and game.decide_turns():
+                    game.turn_text.set_content(f"turn: {game.turn}")
+                    game.state = Game_state.SELECT_ORIGIN
+                    game.set_move_info()
+                
+                if roll_count == 2 and not game.decide_turns():
+                    roll_count = 0
 
                 break # break so that next state uses new mouse cords.        
 
@@ -45,10 +45,8 @@ def main():
                 pos = pygame.mouse.get_pos()
                 x_mouse, y_mouse = pos[0], pos[1]
                 
-                if game.dice_is_rolled:
-                    game.select_origin(x_mouse, y_mouse)
-                    if game.selected_origin:
-                        game.state = Game_state.SELECT_DEST
+                if game.dice_is_rolled and game.select_origin(x_mouse, y_mouse):
+                    game.state = Game_state.SELECT_DEST
                 
                 elif game.roll_dices_btn_clicked(x_mouse, y_mouse):
                     game.roll_dices()
@@ -59,11 +57,12 @@ def main():
                 pos = pygame.mouse.get_pos()
                 x_mouse, y_mouse = pos[0], pos[1]
 
-                game.select_dest(x_mouse, y_mouse)
-                if game.selected_dest:
-                    game.set_move_distance_and_direction()
-                    if game.is_valid_move_on_board():
-                        game.state = Game_state.MOVE
+                if game.undo_btn_clicked(x_mouse, y_mouse):
+                    game.deselect_origin()
+                    game.state = Game_state.SELECT_ORIGIN
+
+                elif game.select_dest(x_mouse, y_mouse) and game.is_valid_move_on_board():
+                    game.state = Game_state.MOVE
                     
 
             if event.type == pygame.MOUSEBUTTONDOWN and game.state == Game_state.MOVE:
