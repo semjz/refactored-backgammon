@@ -6,11 +6,13 @@ from constants import *
 class Piece:   
     def __init__(self, color, radius, center, number):
         self.highlighted = False
+        self.on_mid_bar = False
         self.highlighted_color = YELLOW
         self.color = color
         self.radius = radius
         self.center = center
         self.tri_num = number
+
     
     def draw_piece(self, surface):
         if self.highlighted:
@@ -43,6 +45,13 @@ class Piece:
 
     def get_tri_num(self):
         return self.tri_num
+
+    def set_on_mid_bar(self, bol):
+        self.on_mid_bar = bol
+
+    def is_on_mid_bar(self):
+        return self.on_mid_bar
+
 
     
 

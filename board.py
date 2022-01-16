@@ -18,22 +18,22 @@ class Board():
         self.horizontal_border_size = 150 + ((WIDTH - 950) / 3)  
         self.black_pieces = []
         self.white_pieces = []
-        self.triangle_first_piece_centers = self.set_tris_first_piece_centers()
-        self.pieces = self.create_pieces_list()
         self.white_pieces_on_mid_bar = []
         self.black_pieces_on_mid_bar = []
         self.white_pieces_holder_list = []
         self.black_pieces_holder_list = []
+        self.triangle_first_piece_centers = self.set_tris_first_piece_centers()
+        self.pieces = self.create_pieces_dict()
         self.white_pieces_holder = pygame.Rect(0, 0, 0, 0)
         self.black_pieces_holder = pygame.Rect(0, 0, 0, 0)
         self.left_play_rect_x, self.left_play_rect_y  = self.left_play_rect_cords()
         self.right_play_rect_x, self.right_play_rect_y = self.right_play_rect_cord()
         self.left_play_rect, self.right_play_rect = self.create_play_rects() 
         self.numbers = self.create_numbers()
+        self.dices = self.create_dices()
         self.triangles = []
         self.texts = []
         self.buttons = {}
-        self.dices = self.create_dices()
         self.create_texts()
         self.create_buttons()
         self.create_top_triangles()
@@ -59,10 +59,6 @@ class Board():
         right_play_rect = pygame.Rect(self.right_play_rect_x, self.right_play_rect_y , self.board_play_rect_width, board_play_rect_height)
         return left_play_rect, right_play_rect
     
-        
-    def triangle_is_not_empty(self, tri_num):
-        return self.pieces[tri_num]
-
     def set_a_quarter_tri_pieces(self, triangle_first_piece_centers, start_tri_num, start_x, start_y):
         no_of_squares_from_right = 0
         for tri_num in range(start_tri_num, start_tri_num + 6):
@@ -260,8 +256,10 @@ class Board():
 
             pieces_list[tri_num].append(piece)
             
-    def create_pieces_list(self):
-        pieces = {i:[] for i in range(1, 25)}
+    def create_pieces_dict(self):
+        pieces = {i:[] for i in range(26)}
+        pieces[0] = self.white_pieces_on_mid_bar
+        pieces[25] = self.black_pieces_on_mid_bar
         
         """Set up white peices """
         # tri 1
@@ -388,16 +386,10 @@ class Board():
 
         return dices   
 
-    def draw_pieces_in_mid(self, surface):
-        for piece in self.white_pieces_on_mid_bar:
-            piece.draw_piece(surface)
-        
-        for piece in self.black_pieces_on_mid_bar:
-            piece.draw_piece(surface)
 
     def draw_pieces(self, surface):
-        for i in range(1, 25):
-            for piece in self.pieces[i]:
+        for pieces_dict in self.pieces.values():
+            for piece in pieces_dict:
                 piece.draw_piece(surface)
     
     def draw_white_pieces_in_holder(self, surface):
@@ -423,8 +415,6 @@ class Board():
         self.draw_buttons(surface)
 
         self.draw_pieces(surface)
-        self.draw_pieces_in_mid(surface)
-
         self.draw_white_pieces_in_holder(surface)
         self.draw_black_pieces_in_holder(surface)
  
