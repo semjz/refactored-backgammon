@@ -14,5 +14,3 @@ LIGHT_BROWN = (196, 164, 132)
 DARK_GOLD = (163, 138, 0)
 CLOCK_WISE = "clockwise"
 ANTI_CLOCK_WISE = "anti-clockwise"
-WHITE_MID_BAR = 0
-BLACK_MID_BAR = 25

@@ -39,7 +39,13 @@ class Game:
             piece_to_be_moved = self.board.pieces[self.selected_origin].pop()
         dest_pieces_list = self.board.pieces[self.selected_dest]
         dest_x, dest_first_piece_y = self.board.triangle_first_piece_centers[self.selected_dest]
-    
+        
+        if len(self.board.pieces[self.selected_origin]) >= 5:
+            self.expand_pieces_on_tri()
+
+        if len(self.board.pieces[self.selected_dest]) >= 5:
+            self.retract_pieces_on_tri()
+
         if self.move_is_hit(piece_to_be_moved):
             dest_piece = dest_pieces_list.pop()
             self.place_piece_on_mid_bar(dest_piece)
@@ -94,10 +100,16 @@ class Game:
 
 
     def calc_piece_dest_y(self, dest_pieces_list, dest_first_piece_y):
-        if self.selected_dest < 13:
-            dest_first_piece_y -= len(dest_pieces_list) * 50
+        if len(dest_pieces_list) < 5:
+            distance_between_pieces = 50
         else:
-            dest_first_piece_y += len(dest_pieces_list) * 50
+            distance_between_pieces = 200 / len(dest_pieces_list) + 1
+
+        if self.selected_dest < 13:
+            dest_first_piece_y -= len(dest_pieces_list) * distance_between_pieces
+        else:
+            dest_first_piece_y += len(dest_pieces_list) * distance_between_pieces
+            
         return dest_first_piece_y
 
     def place_piece_on_mid_bar(self, piece: Piece):
@@ -124,6 +136,7 @@ class Game:
 
     def is_valid_move_on_board(self):
         self.set_move_distance_and_direction()
+        # if place holders are destination
         if self.selected_dest in (0, 25):
             return False
         if self.legal_move_direction() and self.move_is_valid_based_on_dices():
@@ -273,7 +286,7 @@ class Game:
             if piece.collide_with_mouse(mouse_x, mouse_y):
                 self.selected_mid_bar_piece = True
                 self.selected_origin = selected_mid_bar
-                selected_piece = self.board.pieces[self.selected_origin][-1]
+                selected_piece = self.board.pieces_at_mid_bar[self.selected_origin][-1]
                 selected_piece.highlight()
                 return True
         return False
@@ -374,6 +387,35 @@ class Game:
             if piece.get_tri_num() and self.board.pieces[piece.get_tri_num()] \
                 and piece.get_tri_num() > self.highest_home_tri_num_with_black_piece:
                 self.highest_home_tri_num_with_black_piece = piece.get_tri_num()
+    
+    def expand_pieces_on_tri(self):
+        no_of_pieces = len(self.board.pieces[self.selected_origin]) 
+        distance_between_pieces = 250 / no_of_pieces
+        x = self.board.triangle_first_piece_centers[self.selected_origin][0]
+        y = self.board.triangle_first_piece_centers[self.selected_origin][1]
+
+        for piece in self.board.pieces[self.selected_origin]:
+            piece.set_center(x, y)
+            if self.selected_origin < 13:
+                y -= distance_between_pieces
+            else:
+                y += distance_between_pieces
+
+    def retract_pieces_on_tri(self):
+        # add one becuase a new piece is to be added to destination triangle
+        #  after calling this method.
+        no_of_pieces = len(self.board.pieces[self.selected_dest]) + 1
+        distance_between_pieces = 250 / no_of_pieces
+        x = self.board.triangle_first_piece_centers[self.selected_dest][0]
+        y = self.board.triangle_first_piece_centers[self.selected_dest][1]
+
+        for piece in self.board.pieces[self.selected_dest]:
+            # set pieces center before updating y.
+            piece.set_center(x, y)
+            if self.selected_dest < 13:
+                y -= distance_between_pieces
+            else:
+                y += distance_between_pieces
 
     def check_winner_determined(self):
         if self.turn == "white" and not self.board.white_pieces:

@@ -421,6 +421,13 @@ class Board():
         for piece_no in range(len(self.black_pieces_holder_list)):            
             pygame.draw.rect(surface, BLACK, (top_left_corner_x, piece_y - piece_no * 12, 50, 10))
 
+    def draw_pieces_at_mid_bar(self, surface):
+        for piece in self.white_pieces_at_mid_bar:
+            piece.draw_piece(surface)
+
+        for piece in self.black_pieces_at_mid_bar:
+            piece.draw_piece(surface)
+
     def draw_board(self, surface):
         
         self.draw_background(surface)
@@ -432,6 +439,7 @@ class Board():
         self.draw_buttons(surface)
 
         self.draw_pieces(surface)
+        self.draw_pieces_at_mid_bar(surface)
         self.draw_white_pieces_in_holder(surface)
         self.draw_black_pieces_in_holder(surface)
  
