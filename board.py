@@ -18,12 +18,14 @@ class Board():
         self.horizontal_border_size = 150 + ((WIDTH - 950) / 3)  
         self.black_pieces = []
         self.white_pieces = []
-        self.white_pieces_on_mid_bar = []
-        self.black_pieces_on_mid_bar = []
+        self.white_pieces_at_mid_bar = []
+        self.black_pieces_at_mid_bar = []
         self.white_pieces_holder_list = []
         self.black_pieces_holder_list = []
         self.triangle_first_piece_centers = self.set_tris_first_piece_centers()
         self.pieces = self.create_pieces_dict()
+        self.pieces_at_mid_bar = self.create_pieces_at_mid_bar_dict()
+        self.pieces_in_holders = self.create_pieces_in_holders_dict()
         self.white_pieces_holder = pygame.Rect(0, 0, 0, 0)
         self.black_pieces_holder = pygame.Rect(0, 0, 0, 0)
         self.left_play_rect_x, self.left_play_rect_y  = self.left_play_rect_cords()
@@ -257,9 +259,7 @@ class Board():
             pieces_list[tri_num].append(piece)
             
     def create_pieces_dict(self):
-        pieces = {i:[] for i in range(26)}
-        pieces[0] = self.white_pieces_on_mid_bar
-        pieces[25] = self.black_pieces_on_mid_bar
+        pieces = {i:[] for i in range(25)}
         
         """Set up white peices """
         # tri 1
@@ -283,6 +283,20 @@ class Board():
         self.set_up_pieces_on_a_tri(24, 2, BLACK, pieces)
         
         return pieces
+
+    def create_pieces_in_holders_dict(self):
+        pieces_in_holders = {}
+        pieces_in_holders[0] = self.black_pieces_holder_list
+        pieces_in_holders[25] = self.white_pieces_holder_list
+
+        return pieces_in_holders
+
+    def create_pieces_at_mid_bar_dict(self):
+        pieces_at_mid_bar = {}
+        pieces_at_mid_bar[0] = self.white_pieces_at_mid_bar
+        pieces_at_mid_bar[25] = self.black_pieces_at_mid_bar
+
+        return pieces_at_mid_bar
 
     def create_button(self, button_x, button_y, button_width, button_height, color, name):
         self.buttons[name] = Button(button_x, button_y, button_width, button_height, color, name)
@@ -386,23 +400,26 @@ class Board():
 
         return dices   
 
-
     def draw_pieces(self, surface):
-        for pieces_dict in self.pieces.values():
-            for piece in pieces_dict:
+        for pieces in self.pieces.values():
+            for piece in pieces:
                 piece.draw_piece(surface)
     
     def draw_white_pieces_in_holder(self, surface):
-        piece_x = WIDTH - 2 * SQUARE_SIZE
+        place_holder_width = 50
+        x_padding = (self.horizontal_border_size - place_holder_width) / 2
+        top_left_corner_x = self.horizontal_border_size + self.board_play_area_width + x_padding
         piece_y = self.vertical_border_size
         for piece_no in range(len(self.white_pieces_holder_list)):
-            pygame.draw.rect(surface, WHITE, (piece_x, piece_y + piece_no * 12, 50, 10))
+            pygame.draw.rect(surface, WHITE, (top_left_corner_x, piece_y + piece_no * 12, 50, 10))
 
     def draw_black_pieces_in_holder(self, surface):
-        piece_x = WIDTH - 2 * SQUARE_SIZE
-        piece_y = self.vertical_border_size  - SQUARE_SIZE
+        place_holder_width = 50
+        x_padding = (self.horizontal_border_size - place_holder_width) / 2
+        top_left_corner_x = self.horizontal_border_size + self.board_play_area_width + x_padding
+        piece_y = HEIGHT - SQUARE_SIZE
         for piece_no in range(len(self.black_pieces_holder_list)):            
-            pygame.draw.rect(surface, BLACK, (piece_x, piece_y - piece_no * 12, 50, 10))
+            pygame.draw.rect(surface, BLACK, (top_left_corner_x, piece_y - piece_no * 12, 50, 10))
 
     def draw_board(self, surface):
         

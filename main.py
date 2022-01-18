@@ -61,16 +61,30 @@ def main():
 
                 elif game.select_dest(x_mouse, y_mouse) and game.is_valid_move_on_board():
                     game.state = Game_state.MOVE
+
+                elif game.select_dest(x_mouse, y_mouse) and game.is_valid_move_to_piece_holders():
+                    game.state = Game_state.MOVE_TO_PLACE_HOLDER
+            
+            
+            if event.type == pygame.MOUSEBUTTONDOWN and game.state == Game_state.MOVE_TO_PLACE_HOLDER:
+                game.move_to_piece_holder()
+                game.state = Game_state.SELECT_ORIGIN
+                game.check_winner_determined()
+
+                if game.no_of_moves_left == 0:
+                    game.change_turn()
+                    game.turn_text.set_content(f"turn: {game.turn}")
+
                     
             if event.type == pygame.MOUSEBUTTONDOWN and game.state == Game_state.MOVE:
                 game.move_on_board()
                 game.state = Game_state.SELECT_ORIGIN
                 
-                if game.no_of_moves_left == 0:
+                if game.get_no_of_moves_left() == 0:
                     game.change_turn()
                     game.turn_text.set_content(f"turn: {game.turn}")
                 
-                if game.turn_color_piece_exist_on_mid_bar():
+                if game.turns_color_piece_on_mid_bar():
                     game.state = Game_state.PIECE_ON_BAR
                 
             if event.type == pygame.MOUSEBUTTONDOWN and game.state == Game_state.PIECE_ON_BAR:
