@@ -479,7 +479,7 @@ class Game:
             try:
                 return self.is_valid_move_on_board(piece_tri_num, self.calc_dest_move_on_board(piece_tri_num, self.valid_moves[0])) \
                        or self.is_valid_move_on_board(piece_tri_num, self.calc_dest_move_on_board(piece_tri_num, self.valid_moves[1]))
-            except:
+            except IndexError:
                 return self.is_valid_move_on_board(piece_tri_num, self.calc_dest_move_on_board(piece_tri_num, self.valid_moves[0]))
 
     def calc_dest_move_on_board(self, piece_tri_num, move_distance):
@@ -503,9 +503,9 @@ class Game:
         piece_tri_num = piece.get_tri_num()
         return self.is_valid_move_to_piece_holders(piece_tri_num, self.calc_dest_move_to_piece_holder())
 
-
     def calc_dest_move_to_piece_holder(self):
         if self.turn == "white":
             return 25
         else:
             return 0
+            
