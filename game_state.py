@@ -6,4 +6,5 @@ class Game_state(Enum):
     MOVE = auto()
     MOVE_TO_PLACE_HOLDER = auto()
     PIECE_ON_BAR = auto()
+    END = auto()
     

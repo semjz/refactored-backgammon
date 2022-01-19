@@ -264,7 +264,7 @@ class Board():
         """Set up white peices """
         # tri 1
         self.set_up_pieces_on_a_tri(1, 2, WHITE, pieces)
-        # tri 12
+        # tri 122
         self.set_up_pieces_on_a_tri(12, 5, WHITE, pieces)
         # tri 17
         self.set_up_pieces_on_a_tri(17, 3, WHITE, pieces)
@@ -400,7 +400,7 @@ class Board():
         place_holder_width = 50
         x_padding = (self.horizontal_border_size - place_holder_width) / 2
         top_left_corner_x = self.horizontal_border_size + self.board_play_area_width + x_padding
-        piece_y = HEIGHT - SQUARE_SIZE
+        piece_y = HEIGHT - SQUARE_SIZE - 10
         for piece_no in range(len(self.black_pieces_holder_list)):            
             pygame.draw.rect(surface, BLACK, (top_left_corner_x, piece_y - piece_no * 12, 50, 10))
 

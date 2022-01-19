@@ -2,6 +2,7 @@ import pygame
 from text import Text
 from constants import *
 
+
 class Button:
 
     pygame.init()

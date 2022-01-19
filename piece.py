@@ -38,7 +38,10 @@ class Piece:
         self.highlighted = False
 
     def get_color(self):
-        return self.color
+        if self.color == WHITE:
+            return "white"
+        else:
+            return "black"
 
     def set_tri_num(self, num):
         self.tri_num = num

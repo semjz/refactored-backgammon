@@ -1,6 +1,6 @@
-
 import pygame
 from constants import *
+
 
 class Text:
     pygame.init()
@@ -12,10 +12,11 @@ class Text:
         self.render_content()
         self.x_cord, self.y_cord = x, y
         self.original_x_cord, self.original_y_cord = x, y
-        self.env_width, self.env_height  = env_width, env_height
+        self.env_width, self.env_height = env_width, env_height
 
     def render_content(self):
-        self.rendered_content = self.font.render(str(self.content), True, BLACK)
+        content = str(self.content)
+        self.rendered_content = self.font.render(content, True, BLACK)
         self.width = self.rendered_content.get_width()
         self.height = self.rendered_content.get_height()
 
@@ -26,7 +27,6 @@ class Text:
     def calc_paddings(self):
         width_padding = self.width / 2
         height_padding = self.height / 2 
-
         return width_padding, height_padding
 
     def add_paddings(self):
@@ -34,7 +34,8 @@ class Text:
         x_cord = self.x_cord - width_padding
         y_cord = self.y_cord - height_padding
         return x_cord, y_cord 
-
+        
     def draw(self, surface):
         x_cord, y_cord = self.add_paddings()
         surface.blit(self.rendered_content, (x_cord, y_cord))
+        

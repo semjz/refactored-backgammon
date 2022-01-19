@@ -1,9 +1,9 @@
-from tkinter.tix import Tree
 import pygame
 from board import Board
 from piece import Piece
 from game_state import Game_state
 from constants import *
+
 
 class Game:
 
@@ -28,7 +28,6 @@ class Game:
         self.lowest_home_tri_num_with_white_piece = None
         self.highest_home_tri_num_with_black_piece = None
         
-
     def change_turn(self):
         if self.turn == "white":
             self.turn = "black"
@@ -73,7 +72,10 @@ class Game:
             if self.move_distance == valid_move: 
                 self.valid_moves.remove(valid_move)
                 break
-
+        # bug fix for pieces nt expanding when moving to piece holder.
+        if len(self.board.pieces[self.selected_origin]) >= 5:
+            self.expand_pieces_on_tri()
+        
         self.no_of_moves_left -= 1
         if self.no_of_moves_left == 0:
             self.dice_is_rolled = False
@@ -88,12 +90,10 @@ class Game:
         else:
             self.board.black_pieces.remove(piece_to_be_moved)
 
-
     def move_is_hit(self, piece_to_be_moved: Piece):
         if len(self.board.pieces[self.selected_dest]) == 1:
             dest_piece = self.board.pieces[self.selected_dest][-1]
             return piece_to_be_moved.get_color() != dest_piece.get_color()
-
 
     def calc_piece_dest_y(self, dest_pieces_list, dest_first_piece_y):
         if len(dest_pieces_list) < 5:
@@ -112,7 +112,7 @@ class Game:
         dest_x = WIDTH / 2
         piece.set_on_mid_bar(True)
 
-        if piece.get_color() == WHITE:
+        if piece.get_color() == "white":
             base_dest_y = HEIGHT - self.board.vertical_border_size - 25
             dest_y = base_dest_y - len(self.board.white_pieces_at_mid_bar) * 50
             piece.set_center(dest_x, dest_y)
@@ -134,26 +134,28 @@ class Game:
     def is_valid_move_on_board(self, origin_tri, dest_tri):
         self.set_move_distance_and_direction(origin_tri, dest_tri)
         # if place holders are destination
-        if dest_tri in (0, 25):
+        if dest_tri <= 0 or dest_tri >= 25:
             return False
         return self.legal_move_direction(origin_tri) and self.move_is_valid_based_on_dices() \
-               and self.check_legal_move_based_on_dest_pieces(origin_tri, dest_tri)
+                and self.check_legal_move_based_on_dest_pieces(origin_tri, dest_tri)
 
-    def is_valid_move_to_piece_holders(self):
-        return (self.move_is_valid_based_on_dices() \
-                or self.piece_of_closest_tri_right_of_determined_tri_by_dices_selected()) \
-                and self.is_valid_move_to_current_turn_piece_holder()
+    def is_valid_move_to_piece_holders(self, origin_tri, dest_tri):
+        self.set_move_distance_and_direction(origin_tri, dest_tri)
+        return (self.move_is_valid_based_on_dices() 
+                or self.piece_of_closest_tri_right_of_determined_tri_by_dices_selected(origin_tri)) \
+                and self.is_valid_move_to_current_turn_piece_holder(dest_tri)
     
 
     def move_is_valid_based_on_dices(self):
         return self.move_distance in self.valid_moves
 
-    def piece_of_closest_tri_right_of_determined_tri_by_dices_selected(self):
-        if self.turn == "white" and self.white_pieces_at_lower_tri_than_determined_origin_tri_by_dices():
-            if self.selected_origin == self.lowest_home_tri_num_with_white_piece:
+    def piece_of_closest_tri_right_of_determined_tri_by_dices_selected(self, origin_tri):
+        if self.turn == "white" and self.white_pieces_at_lower_tri_than_determined_origin_tri_by_dices() \
+            and origin_tri == self.lowest_home_tri_num_with_white_piece:
+                
                 return True
-        if self.turn == "black" and self.black_pieces_at_higher_tri_than_determined_origin_tri_by_dices():
-            if self.selected_origin == self.highest_home_tri_num_with_black_piece:
+        if self.turn == "black" and self.black_pieces_at_higher_tri_than_determined_origin_tri_by_dices() \
+            and origin_tri == self.highest_home_tri_num_with_black_piece:
                 return True
         return False
 
@@ -169,17 +171,17 @@ class Game:
                 return True
         return False
 
-    def is_valid_move_to_current_turn_piece_holder(self):
+    def is_valid_move_to_current_turn_piece_holder(self, dest_tri):
         if self.turn == "white":
-            return self.is_valid_move_to_white_piece_holder()
+            return self.is_valid_move_to_white_piece_holder(dest_tri)
         else:
-            return self.is_valid_move_to_black_piece_holder()
+            return self.is_valid_move_to_black_piece_holder(dest_tri)
 
-    def is_valid_move_to_white_piece_holder(self):
-        return self.pieces_are_at_home_base() and self.selected_dest == 25 
+    def is_valid_move_to_white_piece_holder(self, dest_tri):
+        return self.pieces_are_at_home_base() and dest_tri == 25 
 
-    def is_valid_move_to_black_piece_holder(self):
-        return self.pieces_are_at_home_base() and self.selected_dest == 0  
+    def is_valid_move_to_black_piece_holder(self, dest_tri):
+        return self.pieces_are_at_home_base() and dest_tri == 0  
         
     def pieces_are_at_home_base(self):
         if self.turn == "white":
@@ -197,13 +199,13 @@ class Game:
     # white only moves clockwise and black anti clockwise.
     def legal_move_direction(self, origin_tri):
         current_piece = self.board.pieces[origin_tri][-1]
-        if current_piece.get_color() == WHITE and self.move_direction == CLOCK_WISE:
+        if current_piece.get_color() == "white" and self.move_direction == CLOCK_WISE:
             return True
-        if current_piece.get_color() == BLACK and self.move_direction == ANTI_CLOCK_WISE:
+        if current_piece.get_color() == "black" and self.move_direction == ANTI_CLOCK_WISE:
             return True
         return False
 
-    def check_legal_move_based_on_dest_pieces(self, origin ,dest):
+    def check_legal_move_based_on_dest_pieces(self, origin, dest):
         current_piece = self.board.pieces[origin][-1]
         dest_pieces = self.board.pieces[dest]
             
@@ -287,8 +289,8 @@ class Game:
 
     def select_dest(self, mouse_x, mouse_y):
         self.selected_dest = None
-        # if mouse cords are on a triangle, set selecet origin and highlight the last piece on the triangle
-        # finally break the loop.
+        # if mouse cords are on a triangle, set selecet origin and highlight 
+        # the last piece on the triangle finally break the loop.
         for tri in self.board.triangles:
             if tri.collide_with_mouse(mouse_x, mouse_y):
                 self.selected_dest = tri.get_num()
@@ -301,7 +303,6 @@ class Game:
         if self.black_piece_holder_selected(mouse_x, mouse_y):
             self.selected_dest = 0
             return True
-
         return False       
 
     def white_piece_holder_selected(self, mouse_x, mouse_y):
@@ -420,8 +421,11 @@ class Game:
     def check_winner_determined(self):
         if self.turn == "white" and not self.board.white_pieces:
             print("White wins!")
+            return True
         elif self.turn == "black" and not self.board.black_pieces:
             print("Black wins!")
+            return True
+        return False
 
     def update_board(self, surface):
         self.board.draw_board(surface)
@@ -454,9 +458,54 @@ class Game:
             origin_tri = 25
         
         piece = self.board.pieces[origin_tri][-1]
-        if self.valid_move_exist_from_mid_to_board_for_piece(piece):
-            return True
+        return self.valid_move_exist_from_mid_to_board_for_piece(piece)
+            
+    # check if there are any valid moves on board.
+    def valid_move_exist_on_board(self):
+        for pieces in self.board.pieces.values():
+            if pieces:
+                piece = pieces[-1]
+            else:
+                continue
+            if piece.get_color() == self.turn and self.valid_move_exist_on_board_for_piece(piece):
+                return True
+        return False
+
+    def valid_move_exist_on_board_for_piece(self, piece):
+        piece_tri_num = piece.get_tri_num()
+        if self.double_dice_is_rolled:
+            return self.is_valid_move_on_board(piece_tri_num, self.calc_dest_move_on_board(piece_tri_num, self.valid_moves[0]))
         else:
-            return False
+            try:
+                return self.is_valid_move_on_board(piece_tri_num, self.calc_dest_move_on_board(piece_tri_num, self.valid_moves[0])) \
+                       or self.is_valid_move_on_board(piece_tri_num, self.calc_dest_move_on_board(piece_tri_num, self.valid_moves[1]))
+            except:
+                return self.is_valid_move_on_board(piece_tri_num, self.calc_dest_move_on_board(piece_tri_num, self.valid_moves[0]))
+
+    def calc_dest_move_on_board(self, piece_tri_num, move_distance):
+        if self.turn == "white":
+            return piece_tri_num + move_distance
+        else:
+            return piece_tri_num - move_distance
+
+    # check if there are any valid moves on board.
+    def valid_move_exist_to_piece_holder(self):
+        for pieces in self.board.pieces.values():
+            if pieces:
+                piece = pieces[-1]
+            else:
+                continue
+            if piece.get_color() == self.turn and self.valid_move_exist_to_piece_holder_for_piece(piece):
+                return True
+        return False
+
+    def valid_move_exist_to_piece_holder_for_piece(self, piece):
+        piece_tri_num = piece.get_tri_num()
+        return self.is_valid_move_to_piece_holders(piece_tri_num, self.calc_dest_move_to_piece_holder())
 
 
+    def calc_dest_move_to_piece_holder(self):
+        if self.turn == "white":
+            return 25
+        else:
+            return 0
