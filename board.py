@@ -1,7 +1,6 @@
 import pygame
 import pygame.gfxdraw
 from piece import Piece
-from number import Number
 from button import Button
 from dice import Dice
 from text import Text 
@@ -33,7 +32,7 @@ class Board():
         self.numbers = self.create_numbers()
         self.dices = self.create_dices()
         self.triangles = []
-        self.texts = []
+        self.texts = {}
         self.buttons = {}
         self.create_texts()
         self.create_buttons()
@@ -116,31 +115,31 @@ class Board():
                 x = start_x - no_of_sqaures * SQUARE_SIZE
             else:
                 x = start_x + no_of_sqaures * SQUARE_SIZE
-            numbers.append(Number(tri_num, x, start_y))
+            numbers.append(Text(tri_num, x, start_y, SQUARE_SIZE, SQUARE_SIZE, 16))
             no_of_sqaures += 1
 
 
     def create_bottom_numbers(self, numbers):
         # numbers 1 to 6.
-        top_left_corner_no_1_x = self.horizontal_border_size + self.board_play_area_width - SQUARE_SIZE
-        top_left_corner_y = HEIGHT - self.vertical_border_size
+        top_left_corner_no_1_x = self.horizontal_border_size + self.board_play_area_width - SQUARE_SIZE / 2
+        top_left_corner_y = HEIGHT - self.vertical_border_size / 2
         self.create_a_quarter_numbers(numbers, 1, top_left_corner_no_1_x, top_left_corner_y)
 
         # numbers 7 to 12.
-        top_left_corner_no_7_x = self.horizontal_border_size + self.board_play_rect_width - SQUARE_SIZE
-        top_left_corner_y = HEIGHT - self.vertical_border_size
+        top_left_corner_no_7_x = self.horizontal_border_size + self.board_play_rect_width - SQUARE_SIZE / 2
+        top_left_corner_y = HEIGHT - self.vertical_border_size / 2
         self.create_a_quarter_numbers(numbers, 7, top_left_corner_no_7_x, top_left_corner_y)
 
 
     def create_top_numbers(self, numbers):
         # numbers 13 to 18.
-        top_left_corner_no_13_x = self.horizontal_border_size
-        top_left_corner_y = 0
+        top_left_corner_no_13_x = self.horizontal_border_size + SQUARE_SIZE / 2
+        top_left_corner_y = self.vertical_border_size / 2
         self.create_a_quarter_numbers(numbers, 13, top_left_corner_no_13_x, top_left_corner_y)
 
         # numbers 19 to 24.
-        top_left_corner_no_19_x = self.horizontal_border_size + self.board_play_rect_width + self.middle_border_size
-        top_left_corner_y = 0
+        top_left_corner_no_19_x = self.horizontal_border_size + self.board_play_rect_width + self.middle_border_size + SQUARE_SIZE / 2
+        top_left_corner_y = self.vertical_border_size / 2
         self.create_a_quarter_numbers(numbers, 19, top_left_corner_no_19_x, top_left_corner_y)
           
 
@@ -264,26 +263,24 @@ class Board():
         
         """Set up white peices """
         # tri 1
-        self.set_up_pieces_on_a_tri(19, 1, WHITE, pieces)
-        self.set_up_pieces_on_a_tri(20, 1, WHITE, pieces)
-        self.set_up_pieces_on_a_tri(21, 1, WHITE, pieces)
-        self.set_up_pieces_on_a_tri(22, 1, WHITE, pieces)
-        self.set_up_pieces_on_a_tri(23, 1, WHITE, pieces)
+        self.set_up_pieces_on_a_tri(1, 2, WHITE, pieces)
         # tri 12
-        self.set_up_pieces_on_a_tri(12, 2, WHITE, pieces)
+        self.set_up_pieces_on_a_tri(12, 5, WHITE, pieces)
         # tri 17
-        self.set_up_pieces_on_a_tri(17, 2, WHITE, pieces)
+        self.set_up_pieces_on_a_tri(17, 3, WHITE, pieces)
         # tri 19
-        self.set_up_pieces_on_a_tri(16, 4, WHITE, pieces)
+        self.set_up_pieces_on_a_tri(19, 5, WHITE, pieces)
 
 
         """set up black peices"""
-        self.set_up_pieces_on_a_tri(2, 2, BLACK, pieces)
-        self.set_up_pieces_on_a_tri(3, 2, BLACK, pieces)
-        self.set_up_pieces_on_a_tri(4, 2, BLACK, pieces)
-        self.set_up_pieces_on_a_tri(5, 2, BLACK, pieces)
-        self.set_up_pieces_on_a_tri(6, 2, BLACK, pieces)
-        self.set_up_pieces_on_a_tri(24, 5, BLACK, pieces)
+        # tri 6
+        self.set_up_pieces_on_a_tri(6, 5, BLACK, pieces)
+        # tri 8
+        self.set_up_pieces_on_a_tri(8, 3, BLACK, pieces)
+        # tri 13
+        self.set_up_pieces_on_a_tri(13, 5, BLACK, pieces)
+        # tri 24
+        self.set_up_pieces_on_a_tri(24, 2, BLACK, pieces)
         
         return pieces
 
@@ -295,7 +292,7 @@ class Board():
         return pieces_in_holders
 
     def create_button(self, button_x, button_y, button_width, button_height, color, name):
-        self.buttons[name] = Button(button_x, button_y, button_width, button_height, color, name)
+        self.buttons[name] = Button(button_x, button_y, button_width, button_height, color, name, 18)
     
     def create_buttons(self):
         # button size
@@ -315,43 +312,26 @@ class Board():
         self.create_button(buttons_x, draw_button_y, buttons_width, buttons_height, WHITE, "roll dices")
 
 
-    def create_text(self, text_content, text_x, text_y, text_env_width, text_env_height):
+    def create_text(self, text_content, text_x, text_y, text_env_width, text_env_height, text_name):
 
-        text = Text(text_content, text_x, text_y, text_env_width, text_env_height)
-        self.texts.append(text)
+        text = Text(text_content, text_x, text_y, text_env_width, text_env_height, 17)
+        self.texts[text_name] = text
 
     def create_texts(self):
-
-        # White bar
-        white_bar_content = "white bar"
-        white_bar_text_x = self.horizontal_border_size + self.board_play_rect_width
-        white_bar_text_y = HEIGHT - self.vertical_border_size
-        white_bar_env_width = self.middle_border_size
-        white_bar_env_height = self.vertical_border_size
-        self.create_text(white_bar_content, white_bar_text_x, white_bar_text_y, white_bar_env_width, white_bar_env_height)
-
-        # Black bar 
-        Black_bar_content = "black bar"
-        Black_bar_text_x = self.horizontal_border_size + self.board_play_rect_width
-        Black_bar_text_y = 0
-        Black_bar_env_width = self.middle_border_size
-        Black_bar_env_height = self.vertical_border_size
-        self.create_text(Black_bar_content, Black_bar_text_x, Black_bar_text_y, Black_bar_env_width, Black_bar_env_height)
-
         # turn
         turn_content = ""
-        turn_text_x = 0
-        turn_text_y = 0
+        turn_text_x = self.horizontal_border_size / 2
+        turn_text_y = HEIGHT / 4
         turn_text_env_width = self.horizontal_border_size
         turn_text_env_height = HEIGHT / 2
-        self.create_text(turn_content, turn_text_x, turn_text_y, turn_text_env_width, turn_text_env_height)
+        self.create_text(turn_content, turn_text_x, turn_text_y, turn_text_env_width, turn_text_env_height, "turn")
 
         move_exist = ""
-        move_exist_x = 0
-        move_exist_y = 0
+        move_exist_x = self.horizontal_border_size / 2
+        move_exist_y = HEIGHT / 8
         move_exist_env_width = self.horizontal_border_size
         move_exist_env_height = HEIGHT / 4
-        self.create_text(move_exist, move_exist_x, move_exist_y, move_exist_env_width, move_exist_env_height)
+        self.create_text(move_exist, move_exist_x, move_exist_y, move_exist_env_width, move_exist_env_height, "move exist")
 
 
     def draw_background(self, surface):
@@ -377,7 +357,7 @@ class Board():
         pygame.draw.rect(surface, BROWN, self.black_pieces_holder)
     
     def draw_texts(self, surface):
-        for text in self.texts:
+        for text in self.texts.values():
             text.draw(surface)
         
     def draw_numbers(self, surface):

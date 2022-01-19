@@ -5,14 +5,15 @@ from constants import *
 class Button:
 
     pygame.init()
-    font = pygame.font.SysFont("Arial", 18)
     
-    def __init__(self, x, y, width, height, color, name):
+    def __init__(self, x, y, width, height, color, name, font_size):
         self.top_left_x = x
         self.top_left_y = y
         self.width = width
         self.height = height
-        self.text = Text(name, self.top_left_x, self.top_left_y, self.width, self.height)
+        self.text_x = self.top_left_x + width / 2
+        self.text_y = self.top_left_y + height / 2
+        self.text = Text(name, self.text_x, self.text_y, self.width, self.height, font_size)
         self.color = color
 
     def draw(self, surface):
@@ -21,7 +22,6 @@ class Button:
                                                , self.width, self.height))
         # draw button's text
         self.text.draw(surface)
-
 
     def collide_with_mouse(self, x, y):
         return (self.top_left_x < x < self.top_left_x + self.width) \

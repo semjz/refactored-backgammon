@@ -13,8 +13,8 @@ class Game:
         self.dice_is_rolled = False
         self.double_dice_is_rolled = False
         self.turn = None
-        self.turn_text = self.board.texts[2]
-        self.move_exist_text = self.board.texts[3]
+        self.turn_text = self.board.texts["turn"]
+        self.move_exist_text = self.board.texts["move exist"]
         self.roll_dices_btn = self.board.buttons["roll dices"]
         self.undo_btn = self.board.buttons["undo"]
         self.selected_origin = None
@@ -24,6 +24,7 @@ class Game:
         self.no_of_moves_left = None
         self.valid_moves = []
         self.mid_bar_piece_selected = False
+        self.draw_dices_on_board = False
         self.lowest_home_tri_num_with_white_piece = None
         self.highest_home_tri_num_with_black_piece = None
         
@@ -55,6 +56,7 @@ class Game:
         if self.no_of_moves_left == 0:
             self.dice_is_rolled = False
             self.double_dice_is_rolled = False
+            self.draw_dices_on_board = False
         
         dest_y = self.calc_piece_dest_y(dest_pieces_list, dest_first_piece_y)
         piece_to_be_moved.set_tri_num(self.selected_dest)
@@ -76,6 +78,7 @@ class Game:
         if self.no_of_moves_left == 0:
             self.dice_is_rolled = False
             self.double_dice_is_rolled = False
+            self.draw_dices_on_board = False
 
         piece_to_be_moved.dehighlight()
         dest_pieces_list.append(piece_to_be_moved)
@@ -133,16 +136,14 @@ class Game:
         # if place holders are destination
         if dest_tri in (0, 25):
             return False
-        if self.legal_move_direction(origin_tri) and self.move_is_valid_based_on_dices():
-            return self.check_legal_move_based_on_dest_pieces(origin_tri, dest_tri)
-        return False
+        return self.legal_move_direction(origin_tri) and self.move_is_valid_based_on_dices() \
+               and self.check_legal_move_based_on_dest_pieces(origin_tri, dest_tri)
 
     def is_valid_move_to_piece_holders(self):
-        if self.is_valid_move_to_current_turn_piece_holder():
-            if self.move_is_valid_based_on_dices() \
-                or self.piece_of_closest_tri_right_of_determined_tri_by_dices_selected():
-                return True
-        return False
+        return (self.move_is_valid_based_on_dices() \
+                or self.piece_of_closest_tri_right_of_determined_tri_by_dices_selected()) \
+                and self.is_valid_move_to_current_turn_piece_holder()
+    
 
     def move_is_valid_based_on_dices(self):
         return self.move_distance in self.valid_moves
@@ -161,7 +162,6 @@ class Game:
             if self.lowest_home_tri_num_with_white_piece > 25 - valid_move:
                 return True
         return False
-
 
     def black_pieces_at_higher_tri_than_determined_origin_tri_by_dices(self):
         for valid_move in self.valid_moves:
@@ -322,12 +322,14 @@ class Game:
         for dice in self.board.dices:
             dice.roll()
         self.dice_is_rolled = True
+        self.draw_dices_on_board = True
         self.set_double_dice_is_rolled()
         self.set_move_info()
 
     def roll_single_dice(self, dice_no):
         self.board.dices[dice_no - 1].roll()
         self.dice_is_rolled = True
+        self.draw_dices_on_board = True
         self.roll_dices_btn.set_color(TAN)
 
     # check if a double dice is rolled, set valid moves and number of moves
@@ -423,11 +425,11 @@ class Game:
 
     def update_board(self, surface):
         self.board.draw_board(surface)
-        if self.no_of_moves_left != 0:
+        if self.draw_dices_on_board:
             self.draw_dices(surface)
         pygame.display.update()
 
-# if any valid move can be made at a turn
+# check if there are any valid moves from mid bar peice to board.
     def valid_move_exist_from_mid_to_board_for_piece(self, piece):
         piece_tri_num = piece.get_tri_num()
         if self.double_dice_is_rolled:

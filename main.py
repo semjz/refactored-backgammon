@@ -34,7 +34,7 @@ def main():
                 
                 """Decide the turns after 2 roll out"""
                 if roll_count == 2 and game.decide_turns():
-                    game.turn_text.set_content(f"turn: {game.turn}")
+                    game.turn_text.set_content(f"{game.turn}'s turn")
                     game.state = Game_state.SELECT_ORIGIN
                     game.set_move_info()
                 
@@ -52,7 +52,7 @@ def main():
                 elif not game.dice_is_rolled and game.roll_dices_btn_clicked(x_mouse, y_mouse):
                     game.roll_dices()
                     game.move_exist_text.set_content(f"")
-                    game.turn_text.set_content(f"turn: {game.turn}")
+                    game.turn_text.set_content(f"{game.turn}'s turn")
 
                 break # break so that next state uses new mouse cords. 
 
@@ -77,7 +77,7 @@ def main():
 
                 if game.no_of_moves_left == 0:
                     game.change_turn()
-                    game.turn_text.set_content(f"turn: {game.turn}")
+                    game.turn_text.set_content(f"{game.turn}'s turn")
 
                 if game.turns_color_piece_on_mid_bar():
                     game.state = Game_state.PIECE_ON_BAR
@@ -89,7 +89,7 @@ def main():
                 
                 if game.get_no_of_moves_left() == 0:
                     game.change_turn()
-                    game.turn_text.set_content(f"turn: {game.turn}")
+                    game.turn_text.set_content(f"{game.turn}'s turn")
                 
                 if game.turns_color_piece_on_mid_bar():
                     game.state = Game_state.PIECE_ON_BAR
