@@ -1,3 +1,4 @@
+from tkinter.tix import Tree
 import pygame
 from board import Board
 from piece import Piece
@@ -13,6 +14,7 @@ class Game:
         self.double_dice_is_rolled = False
         self.turn = None
         self.turn_text = self.board.texts[2]
+        self.move_exist_text = self.board.texts[3]
         self.roll_dices_btn = self.board.buttons["roll dices"]
         self.undo_btn = self.board.buttons["undo"]
         self.selected_origin = None
@@ -21,7 +23,7 @@ class Game:
         self.move_direction = None
         self.no_of_moves_left = None
         self.valid_moves = []
-        self.selected_mid_bar_piece = False
+        self.mid_bar_piece_selected = False
         self.lowest_home_tri_num_with_white_piece = None
         self.highest_home_tri_num_with_black_piece = None
         
@@ -33,10 +35,7 @@ class Game:
             self.turn = "white"
 
     def move_on_board(self):
-        if self.selected_mid_bar_piece:
-            piece_to_be_moved = self.board.pieces_at_mid_bar[self.selected_origin].pop()
-        else:
-            piece_to_be_moved = self.board.pieces[self.selected_origin].pop()
+        piece_to_be_moved = self.board.pieces[self.selected_origin].pop()
         dest_pieces_list = self.board.pieces[self.selected_dest]
         dest_x, dest_first_piece_y = self.board.triangle_first_piece_centers[self.selected_dest]
         
@@ -61,11 +60,8 @@ class Game:
         piece_to_be_moved.set_tri_num(self.selected_dest)
         piece_to_be_moved.set_center(dest_x, dest_y)
         piece_to_be_moved.dehighlight()
-        self.selected_mid_bar_piece = False
+        self.mid_bar_piece_selected = False
         dest_pieces_list.append(piece_to_be_moved)
-
-        self.calc_lowest_home_tri_num_with_white_piece()
-        self.calc_highest_home_tri_num_with_black_piece()
 
     def move_to_piece_holder(self):
         piece_to_be_moved = self.board.pieces[self.selected_origin].pop()
@@ -89,9 +85,6 @@ class Game:
         else:
             self.board.black_pieces.remove(piece_to_be_moved)
 
-        self.calc_lowest_home_tri_num_with_white_piece()
-        self.calc_highest_home_tri_num_with_black_piece()
-
 
     def move_is_hit(self, piece_to_be_moved: Piece):
         if len(self.board.pieces[self.selected_dest]) == 1:
@@ -109,23 +102,24 @@ class Game:
             dest_first_piece_y -= len(dest_pieces_list) * distance_between_pieces
         else:
             dest_first_piece_y += len(dest_pieces_list) * distance_between_pieces
-            
+
         return dest_first_piece_y
 
     def place_piece_on_mid_bar(self, piece: Piece):
         dest_x = WIDTH / 2
         piece.set_on_mid_bar(True)
-        piece.set_tri_num(None)
 
         if piece.get_color() == WHITE:
             base_dest_y = HEIGHT - self.board.vertical_border_size - 25
             dest_y = base_dest_y - len(self.board.white_pieces_at_mid_bar) * 50
             piece.set_center(dest_x, dest_y)
+            piece.set_tri_num(0)
             self.board.white_pieces_at_mid_bar.append(piece)
         else:
             base_dest_y = self.board.vertical_border_size + 25
             dest_y = base_dest_y + len(self.board.black_pieces_at_mid_bar) * 50
             piece.set_center(dest_x, dest_y)
+            piece.set_tri_num(25)
             self.board.black_pieces_at_mid_bar.append(piece)
 
     def turns_color_piece_on_mid_bar(self):
@@ -134,17 +128,14 @@ class Game:
         else:
             return self.board.black_pieces_at_mid_bar
 
-    def is_valid_move_on_board(self):
-        self.set_move_distance_and_direction()
+    def is_valid_move_on_board(self, origin_tri, dest_tri):
+        self.set_move_distance_and_direction(origin_tri, dest_tri)
         # if place holders are destination
-        if self.selected_dest in (0, 25):
+        if dest_tri in (0, 25):
             return False
-        if self.legal_move_direction() and self.move_is_valid_based_on_dices():
-            return self.check_legal_move_based_on_dest_pieces(self.selected_dest)
+        if self.legal_move_direction(origin_tri) and self.move_is_valid_based_on_dices():
+            return self.check_legal_move_based_on_dest_pieces(origin_tri, dest_tri)
         return False
-
-    def move_is_valid_based_on_dices(self):
-        return self.move_distance in self.valid_moves
 
     def is_valid_move_to_piece_holders(self):
         if self.is_valid_move_to_current_turn_piece_holder():
@@ -152,6 +143,9 @@ class Game:
                 or self.piece_of_closest_tri_right_of_determined_tri_by_dices_selected():
                 return True
         return False
+
+    def move_is_valid_based_on_dices(self):
+        return self.move_distance in self.valid_moves
 
     def piece_of_closest_tri_right_of_determined_tri_by_dices_selected(self):
         if self.turn == "white" and self.white_pieces_at_lower_tri_than_determined_origin_tri_by_dices():
@@ -201,16 +195,16 @@ class Game:
         return True
 
     # white only moves clockwise and black anti clockwise.
-    def legal_move_direction(self):
-        current_piece = self.board.pieces[self.selected_origin][-1]
+    def legal_move_direction(self, origin_tri):
+        current_piece = self.board.pieces[origin_tri][-1]
         if current_piece.get_color() == WHITE and self.move_direction == CLOCK_WISE:
             return True
         if current_piece.get_color() == BLACK and self.move_direction == ANTI_CLOCK_WISE:
             return True
         return False
 
-    def check_legal_move_based_on_dest_pieces(self, dest):
-        current_piece = self.board.pieces[self.selected_origin][-1]
+    def check_legal_move_based_on_dest_pieces(self, origin ,dest):
+        current_piece = self.board.pieces[origin][-1]
         dest_pieces = self.board.pieces[dest]
             
         # if destination triangle has one or no piece, move is legal.
@@ -284,9 +278,9 @@ class Game:
         
         for piece in pieces:
             if piece.collide_with_mouse(mouse_x, mouse_y):
-                self.selected_mid_bar_piece = True
+                self.mid_bar_piece_selected = True
                 self.selected_origin = selected_mid_bar
-                selected_piece = self.board.pieces_at_mid_bar[self.selected_origin][-1]
+                selected_piece = self.board.pieces[self.selected_origin][-1]
                 selected_piece.highlight()
                 return True
         return False
@@ -361,8 +355,8 @@ class Game:
                 self.turn = "black"
             return True
     
-    def set_move_distance_and_direction(self):
-        displacment = self.selected_dest - self.selected_origin
+    def set_move_distance_and_direction(self, origin_tri, dest_tri):
+        displacment = dest_tri - origin_tri
         self.move_distance = abs(displacment)
 
         if displacment > 0:
@@ -377,6 +371,8 @@ class Game:
     def calc_lowest_home_tri_num_with_white_piece(self):
         self.lowest_home_tri_num_with_white_piece = 24
         for piece in self.board.white_pieces:
+            if piece.get_tri_num() in (0,25):
+                break
             if piece.get_tri_num() and self.board.pieces[piece.get_tri_num()] \
                 and piece.get_tri_num() < self.lowest_home_tri_num_with_white_piece:
                 self.lowest_home_tri_num_with_white_piece = piece.get_tri_num()
@@ -384,7 +380,9 @@ class Game:
     def calc_highest_home_tri_num_with_black_piece(self):
         self.highest_home_tri_num_with_black_piece = 1
         for piece in self.board.black_pieces:
-            if piece.get_tri_num() and self.board.pieces[piece.get_tri_num()] \
+            if piece.get_tri_num() in (0,25):
+                break
+            if  self.board.pieces[piece.get_tri_num()] \
                 and piece.get_tri_num() > self.highest_home_tri_num_with_black_piece:
                 self.highest_home_tri_num_with_black_piece = piece.get_tri_num()
     
@@ -425,12 +423,38 @@ class Game:
 
     def update_board(self, surface):
         self.board.draw_board(surface)
-        if self.dice_is_rolled:
+        if self.no_of_moves_left != 0:
             self.draw_dices(surface)
         pygame.display.update()
 
-                
+# if any valid move can be made at a turn
+    def valid_move_exist_from_mid_to_board_for_piece(self, piece):
+        piece_tri_num = piece.get_tri_num()
+        if self.double_dice_is_rolled:
+            return self.is_valid_move_on_board(*self.calc_orig_and_dest_move_from_mid_to_board(piece_tri_num, self.valid_moves[0]))
+        else:
+            try:
+                return self.is_valid_move_on_board(*self.calc_orig_and_dest_move_from_mid_to_board(piece_tri_num, self.valid_moves[0])) \
+                       or self.is_valid_move_on_board(*self.calc_orig_and_dest_move_from_mid_to_board(piece_tri_num, self.valid_moves[1]))
+            except IndexError:
+                return self.is_valid_move_on_board(*self.calc_orig_and_dest_move_from_mid_to_board(piece_tri_num, self.valid_moves[0]))
+    
+    def calc_orig_and_dest_move_from_mid_to_board(self, piece_tri_num, move_distance):
+        if self.turn == "white":
+            return 0, piece_tri_num + move_distance
+        else:
+            return 25, piece_tri_num - move_distance
 
-
+    def valid_move_exist_from_mid_to_board(self):
+        if self.turn == "white":
+            origin_tri = 0
+        else:
+            origin_tri = 25
+        
+        piece = self.board.pieces[origin_tri][-1]
+        if self.valid_move_exist_from_mid_to_board_for_piece(piece):
+            return True
+        else:
+            return False
 
 

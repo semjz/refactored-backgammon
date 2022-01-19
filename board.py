@@ -24,7 +24,6 @@ class Board():
         self.black_pieces_holder_list = []
         self.triangle_first_piece_centers = self.set_tris_first_piece_centers()
         self.pieces = self.create_pieces_dict()
-        self.pieces_at_mid_bar = self.create_pieces_at_mid_bar_dict()
         self.pieces_in_holders = self.create_pieces_in_holders_dict()
         self.white_pieces_holder = pygame.Rect(0, 0, 0, 0)
         self.black_pieces_holder = pygame.Rect(0, 0, 0, 0)
@@ -259,28 +258,32 @@ class Board():
             pieces_list[tri_num].append(piece)
             
     def create_pieces_dict(self):
-        pieces = {i:[] for i in range(25)}
+        pieces = {i:[] for i in range(1, 26)}
+        pieces[0] = self.white_pieces_at_mid_bar
+        pieces[25] = self.black_pieces_at_mid_bar
         
         """Set up white peices """
         # tri 1
-        self.set_up_pieces_on_a_tri(1, 2, WHITE, pieces)
+        self.set_up_pieces_on_a_tri(19, 1, WHITE, pieces)
+        self.set_up_pieces_on_a_tri(20, 1, WHITE, pieces)
+        self.set_up_pieces_on_a_tri(21, 1, WHITE, pieces)
+        self.set_up_pieces_on_a_tri(22, 1, WHITE, pieces)
+        self.set_up_pieces_on_a_tri(23, 1, WHITE, pieces)
         # tri 12
-        self.set_up_pieces_on_a_tri(12, 5, WHITE, pieces)
+        self.set_up_pieces_on_a_tri(12, 2, WHITE, pieces)
         # tri 17
-        self.set_up_pieces_on_a_tri(17, 3, WHITE, pieces)
+        self.set_up_pieces_on_a_tri(17, 2, WHITE, pieces)
         # tri 19
-        self.set_up_pieces_on_a_tri(19, 5, WHITE, pieces)
+        self.set_up_pieces_on_a_tri(16, 4, WHITE, pieces)
 
 
         """set up black peices"""
-        # tri 6
-        self.set_up_pieces_on_a_tri(6, 5, BLACK, pieces)
-        # tri 8
-        self.set_up_pieces_on_a_tri(8, 3, BLACK, pieces)
-        # tri 13
-        self.set_up_pieces_on_a_tri(13, 5, BLACK, pieces)
-        # tri 24
-        self.set_up_pieces_on_a_tri(24, 2, BLACK, pieces)
+        self.set_up_pieces_on_a_tri(2, 2, BLACK, pieces)
+        self.set_up_pieces_on_a_tri(3, 2, BLACK, pieces)
+        self.set_up_pieces_on_a_tri(4, 2, BLACK, pieces)
+        self.set_up_pieces_on_a_tri(5, 2, BLACK, pieces)
+        self.set_up_pieces_on_a_tri(6, 2, BLACK, pieces)
+        self.set_up_pieces_on_a_tri(24, 5, BLACK, pieces)
         
         return pieces
 
@@ -290,13 +293,6 @@ class Board():
         pieces_in_holders[25] = self.white_pieces_holder_list
 
         return pieces_in_holders
-
-    def create_pieces_at_mid_bar_dict(self):
-        pieces_at_mid_bar = {}
-        pieces_at_mid_bar[0] = self.white_pieces_at_mid_bar
-        pieces_at_mid_bar[25] = self.black_pieces_at_mid_bar
-
-        return pieces_at_mid_bar
 
     def create_button(self, button_x, button_y, button_width, button_height, color, name):
         self.buttons[name] = Button(button_x, button_y, button_width, button_height, color, name)
@@ -349,6 +345,13 @@ class Board():
         turn_text_env_width = self.horizontal_border_size
         turn_text_env_height = HEIGHT / 2
         self.create_text(turn_content, turn_text_x, turn_text_y, turn_text_env_width, turn_text_env_height)
+
+        move_exist = ""
+        move_exist_x = 0
+        move_exist_y = 0
+        move_exist_env_width = self.horizontal_border_size
+        move_exist_env_height = HEIGHT / 4
+        self.create_text(move_exist, move_exist_x, move_exist_y, move_exist_env_width, move_exist_env_height)
 
 
     def draw_background(self, surface):
