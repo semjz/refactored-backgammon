@@ -67,11 +67,17 @@ class Game:
     def move_to_piece_holder(self):
         piece_to_be_moved = self.board.pieces[self.selected_origin].pop()
         dest_pieces_list = self.board.pieces_in_holders[self.selected_dest]
-    
-        for valid_move in self.valid_moves:
-            if self.move_distance == valid_move: 
-                self.valid_moves.remove(valid_move)
-                break
+
+        # fix bug to remove dice from valid moves when a piece on lower
+        # tri than indicated by dice is removed.
+        if self.move_distance in self.valid_moves:
+            self.valid_moves.remove(self.move_distance)
+        else:
+            for valid_move in self.valid_moves:
+                if self.move_distance < valid_move: 
+                    self.valid_moves.remove(valid_move)
+                    break
+                
         # bug fix for pieces nt expanding when moving to piece holder.
         if len(self.board.pieces[self.selected_origin]) >= 5:
             self.expand_pieces_on_tri()

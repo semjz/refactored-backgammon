@@ -30,6 +30,9 @@ class Piece:
 
     def set_center(self, x, y):
         self.center = (x, y)
+    
+    def get_center(self):
+        return self.center
 
     def highlight(self):
         self.highlighted = True
