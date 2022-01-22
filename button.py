@@ -14,7 +14,7 @@ class Button:
         self.height = height
         self.text_x = self.top_left_x + width / 2
         self.text_y = self.top_left_y + height / 2
-        self.text = Text(name, self.text_x, self.text_y, self.width, self.height, font_size)
+        self.text = Text(name, self.text_x, self.text_y, self.width, self.height, BLACK ,font_size)
         self.color = color
 
     def draw(self, surface):

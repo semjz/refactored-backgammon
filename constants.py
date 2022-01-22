@@ -2,6 +2,7 @@ WIDTH, HEIGHT = 1000, 650
 SQUARE_SIZE = 50
 
 # colors rgb
+RED = (255, 0, 0)
 BOLD_CREAM = (255, 204, 153)
 GRAY = (128, 128, 128)
 BLACK = (0, 0, 0)
@@ -12,5 +13,7 @@ TAN = (210, 180, 140)
 BROWN = (150, 75, 0)
 LIGHT_BROWN = (196, 164, 132)
 DARK_GOLD = (163, 138, 0)
+
+
 CLOCK_WISE = "clockwise"
 ANTI_CLOCK_WISE = "anti-clockwise"

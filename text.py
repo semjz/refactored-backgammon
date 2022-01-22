@@ -6,23 +6,23 @@ class Text:
     pygame.init()
     font = pygame.font.SysFont("Arial", 16)
     
-    def __init__(self, content, x, y, env_width, env_height, font_size):
+    def __init__(self, content, x, y, env_width, env_height, color, font_size):
         self.font = pygame.font.SysFont("Arial", font_size)
         self.content = content
-        self.render_content()
+        self.render_content(color)
         self.x_cord, self.y_cord = x, y
         self.original_x_cord, self.original_y_cord = x, y
         self.env_width, self.env_height = env_width, env_height
 
-    def render_content(self):
+    def render_content(self, color):
         content = str(self.content)
-        self.rendered_content = self.font.render(content, True, BLACK)
+        self.rendered_content = self.font.render(content, True, color)
         self.width = self.rendered_content.get_width()
         self.height = self.rendered_content.get_height()
 
-    def set_content(self, text):
+    def set_content(self, text, color):
         self.content = text
-        self.render_content()
+        self.render_content(color)
 
     def calc_paddings(self):
         width_padding = self.width / 2

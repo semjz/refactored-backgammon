@@ -115,7 +115,7 @@ class Board():
                 x = start_x - no_of_sqaures * SQUARE_SIZE
             else:
                 x = start_x + no_of_sqaures * SQUARE_SIZE
-            numbers.append(Text(tri_num, x, start_y, SQUARE_SIZE, SQUARE_SIZE, 16))
+            numbers.append(Text(tri_num, x, start_y, SQUARE_SIZE, SQUARE_SIZE, BLACK , 16))
             no_of_sqaures += 1
 
 
@@ -264,7 +264,7 @@ class Board():
         """Set up white peices """
         # tri 1
         self.set_up_pieces_on_a_tri(1, 2, WHITE, pieces)
-        # tri 122
+        # tri 12
         self.set_up_pieces_on_a_tri(12, 5, WHITE, pieces)
         # tri 17
         self.set_up_pieces_on_a_tri(17, 3, WHITE, pieces)
@@ -312,10 +312,13 @@ class Board():
         self.create_button(buttons_x, draw_button_y, buttons_width, buttons_height, WHITE, "roll dices")
 
 
-    def create_text(self, text_content, text_x, text_y, text_env_width, text_env_height, text_name):
+    def create_text(self, text_content, text_x, text_y, text_env_width, text_env_height, color, font_size, text_name):
 
-        text = Text(text_content, text_x, text_y, text_env_width, text_env_height, 17)
+        text = Text(text_content, text_x, text_y, text_env_width, text_env_height, color, font_size)
         self.texts[text_name] = text
+
+    def remove_text(self, text_name):
+        self.texts.pop(text_name, "text doesn't exist")
 
     def create_texts(self):
         # turn
@@ -324,14 +327,16 @@ class Board():
         turn_text_y = HEIGHT / 4
         turn_text_env_width = self.horizontal_border_size
         turn_text_env_height = HEIGHT / 2
-        self.create_text(turn_content, turn_text_x, turn_text_y, turn_text_env_width, turn_text_env_height, "turn")
+        self.create_text(turn_content, turn_text_x, turn_text_y, turn_text_env_width, turn_text_env_height
+                         , BLACK, 17, "turn")
 
         move_exist = ""
         move_exist_x = self.horizontal_border_size / 2
         move_exist_y = HEIGHT / 8
         move_exist_env_width = self.horizontal_border_size
         move_exist_env_height = HEIGHT / 4
-        self.create_text(move_exist, move_exist_x, move_exist_y, move_exist_env_width, move_exist_env_height, "move exist")
+        self.create_text(move_exist, move_exist_x, move_exist_y, move_exist_env_width, move_exist_env_height
+                         , BLACK, 17, "move exist")
 
 
     def draw_background(self, surface):
@@ -373,13 +378,21 @@ class Board():
         dices_width, dices_height = 40, 40
         dices_y = HEIGHT / 2 - dices_height / 2
        
-        dice_1_x = self.horizontal_border_size / 2 - (5 + dices_width)
+        dice_1_x = self.horizontal_border_size + self.board_play_area_width - self.board_play_rect_width / 2 + 55
         dice_1 = Dice(dices_width, dices_height, WHITE, dice_1_x, dices_y)
         dices.append(dice_1)
        
-        dice_2_x = self.horizontal_border_size / 2 + 5 
+        dice_2_x = dice_1_x - 50
         dice_2 = Dice(dices_width, dices_height, WHITE, dice_2_x, dices_y)
         dices.append(dice_2)
+
+        dice_3_x = dice_2_x - 50
+        dice_3 = Dice(dices_width, dices_height, WHITE, dice_3_x, dices_y)
+        dices.append(dice_3)
+
+        dice_4_x = dice_3_x - 50  
+        dice_4 = Dice(dices_width, dices_height, WHITE, dice_4_x, dices_y)
+        dices.append(dice_4)
 
         return dices   
 
@@ -417,7 +430,6 @@ class Board():
         self.draw_play_rects(surface)
         self.draw_all_triangles(surface)
         self.draw_numbers(surface)
-        self.draw_texts(surface)
         self.draw_piece_holders(surface)
         self.draw_buttons(surface)
 
@@ -425,6 +437,8 @@ class Board():
         self.draw_pieces_at_mid_bar(surface)
         self.draw_white_pieces_in_holder(surface)
         self.draw_black_pieces_in_holder(surface)
+
+        self.draw_texts(surface)
  
 
 
