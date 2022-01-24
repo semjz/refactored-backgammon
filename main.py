@@ -3,11 +3,9 @@ from game import Game
 from game_state import Game_state
 from constants import *
 
-
 FPS = 60
 WIN = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Backgammon")
-
 
 def main():
     running = True
@@ -19,10 +17,6 @@ def main():
     while running:
         clock.tick(FPS)
 
-        # for test purpose
-        # game.calc_lowest_home_tri_num_with_white_piece()
-        # game.calc_highest_home_tri_num_with_black_piece()
-
         if game.state == Game_state.SELECT_ORIGIN and game.dice_is_rolled \
             and not game.valid_move_exist_on_board() \
             and not game.valid_move_exist_to_piece_holder():
@@ -31,8 +25,7 @@ def main():
                 game.turn_text.set_content(f"{game.turn}'s turn", BLACK)
                 game.dice_is_rolled = False
                 no_valid_moves = True
-                game.undraw_extra_dices()
-
+ 
         if game.state == Game_state.PIECE_ON_BAR and game.dice_is_rolled \
             and not game.valid_move_exist_from_mid_to_board():
             
@@ -40,7 +33,6 @@ def main():
                 game.move_exist_text.set_content(f"No valid move for {game.turn}", BLACK)
                 game.dice_is_rolled = False
                 no_valid_moves = True
-                game.undraw_extra_dices()
 
         if game.state == Game_state.END:
             game.turn_text.set_content(f"{game.winner} wins", BLACK)
@@ -53,7 +45,11 @@ def main():
                 x_mouse, y_mouse = pygame.mouse.get_pos()
 
                 if game.roll_dices_btn_clicked(x_mouse, y_mouse):
-                    game.roll_single_dice(roll_count)
+                    game.roll_dices_btn.set_color(TAN)
+                    if roll_count == 0:
+                        game.roll_single_dice(roll_count, WHITE)
+                    if roll_count == 1:
+                        game.roll_single_dice(roll_count, BLACK)
                     roll_count += 1
                 
                 """Decide the turns after 2 rolls"""
@@ -86,7 +82,6 @@ def main():
                         game.turn_text.set_content(f"{game.turn}'s turn", BLACK)
                         game.dice_is_rolled = False
                         no_valid_moves = True
-                        game.undraw_extra_dices()
                     
                     else:
                         game.move_exist_text.set_content(f"", BLACK)
@@ -101,10 +96,10 @@ def main():
                     game.deselect_origin()
                     game.state = Game_state.SELECT_ORIGIN
 
-                elif game.select_dest(x_mouse, y_mouse) and game.is_valid_move_on_board(game.selected_origin, game.selected_dest):
+                if game.select_dest(x_mouse, y_mouse) and game.is_valid_move_on_board(game.selected_origin, game.selected_dest):
                     game.state = Game_state.MOVE
 
-                elif game.select_dest(x_mouse, y_mouse) and game.is_valid_move_to_piece_holders(game.selected_origin, game.selected_dest):
+                if game.select_dest(x_mouse, y_mouse) and game.is_valid_move_to_piece_holders(game.selected_origin, game.selected_dest):
                     game.state = Game_state.MOVE_TO_PLACE_HOLDER
 
             if event.type == pygame.MOUSEBUTTONDOWN and game.state == Game_state.MOVE:
@@ -140,16 +135,14 @@ def main():
                 # if dice is not rolled, it must be rolled first and game checks if there are
                 # any valid moves from mid to the board.
                 elif not game.dice_is_rolled and game.roll_dices_btn_clicked(x_mouse, y_mouse):
-                    
                     game.roll_dices_btn.set_color(TAN)
                     game.roll_dices()
-                    
+    
                     if not game.valid_move_exist_from_mid_to_board():
                         game.state = Game_state.SELECT_ORIGIN
                         game.move_exist_text.set_content(f"No valid move for {game.turn}", BLACK)
                         game.dice_is_rolled = False
                         no_valid_moves = True
-                        game.undraw_extra_dices()
 
             if event.type == pygame.MOUSEBUTTONUP:
                 game.reset_btns_color()

@@ -10,6 +10,7 @@ class Game:
     def __init__(self):
         self.board = Board()
         self.state = Game_state.DECIDE_TURNS
+        self.first_2_moves_is_made = False
         self.dice_is_rolled = False
         self.double_dice_is_rolled = False
         self.turn = None
@@ -27,12 +28,17 @@ class Game:
         self.mid_bar_piece_selected = False
         self.lowest_home_tri_num_with_white_piece = None
         self.highest_home_tri_num_with_black_piece = None
+        self.calc_lowest_home_tri_num_with_white_piece()
+        self.calc_highest_home_tri_num_with_black_piece()
         
     def change_turn(self):
         if self.turn == "white":
             self.turn = "black"
         else:
             self.turn = "white"
+
+        if not self.first_2_moves_is_made:
+            self.first_2_moves_is_made = True
 
     def move_on_board(self):
         origin_pieces_list = self.board.pieces[self.selected_origin]
@@ -139,13 +145,11 @@ class Game:
                                    , 18
                                    , self.selected_dest)
 
-
     def remove_piece_from_tri_5_or_more(self, origin_pieces_list):
         if len(origin_pieces_list) == 5:
             self.board.remove_text(self.selected_origin)
         else:
             self.board.texts[self.selected_origin].set_content(len(origin_pieces_list), RED)
-
 
     def calc_piece_dest_y(self, dest_pieces_list, dest_first_piece_y):
         if len(dest_pieces_list) <= 4:
@@ -366,6 +370,7 @@ class Game:
 
     # roll dices and set move info.
     def roll_dices(self):
+        self.undraw_extra_dices()
         double_dice_num = None
         for i in range(1, 3):
             self.board.dices[i].roll()
@@ -381,11 +386,12 @@ class Game:
         self.dice_is_rolled = True
         self.set_move_info()
 
-    def roll_single_dice(self, dice_no):
+    def roll_single_dice(self, dice_no, color):
         self.board.dices[dice_no + 1].roll()
         self.board.dices[dice_no + 1].set_to_be_drawn(True)
+        self.board.dices[dice_no + 1].set_color(color)
         self.dice_is_rolled = True
-        self.roll_dices_btn.set_color(TAN)
+
 
     # check if a double dice is rolled, set valid moves and number of moves
     # and distance left to move.
@@ -396,7 +402,7 @@ class Game:
     def draw_dices(self, surface):
         for dice in self.board.dices:
             if dice.get_to_be_drawn() and dice.get_num():
-                dice.draw(surface, self.turn)
+                dice.draw(surface, self.turn, self.first_2_moves_is_made)
 
     # if first dice has a greater number first turn is white otherwise blacks
     def decide_turns(self):
@@ -406,6 +412,7 @@ class Game:
         if first_dice_num == second_dice_num:
             return False
         else:
+            self.turn_decided = True
             if first_dice_num > second_dice_num:
                 self.turn = "white"
             else:
@@ -427,18 +434,14 @@ class Game:
 
     def calc_lowest_home_tri_num_with_white_piece(self):
         self.lowest_home_tri_num_with_white_piece = 24
-        for piece in self.board.white_pieces:
-            if piece.get_tri_num() in (0,25):
-                break
+        for piece in self.board.white_pieces[1:25]:
             if piece.get_tri_num() and self.board.pieces[piece.get_tri_num()] \
                 and piece.get_tri_num() < self.lowest_home_tri_num_with_white_piece:
                 self.lowest_home_tri_num_with_white_piece = piece.get_tri_num()
 
     def calc_highest_home_tri_num_with_black_piece(self):
         self.highest_home_tri_num_with_black_piece = 1
-        for piece in self.board.black_pieces:
-            if piece.get_tri_num() in (0,25):
-                break
+        for piece in self.board.black_pieces[1:25]:
             if self.board.pieces[piece.get_tri_num()] \
                and piece.get_tri_num() > self.highest_home_tri_num_with_black_piece:
                 self.highest_home_tri_num_with_black_piece = piece.get_tri_num()

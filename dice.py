@@ -4,10 +4,9 @@ import random
 from constants import *
 
 class Dice:
-    def __init__(self, width, height, color, x, y):
+    def __init__(self, width, height, x, y):
         self.width = width
         self.height = height
-        self.color = color
         self.num = None
         self.x_top_left = x
         self.y_top_left = y
@@ -25,52 +24,62 @@ class Dice:
 
     def set_num(self, num):
         self.num = num
+    
+    def set_color(self, color):
+        if color == BLACK:
+            self.rec_color = BLACK
+            self.circ_color = WHITE
         
+        if color == WHITE:
+            self.rec_color = WHITE
+            self.circ_color = BLACK
+
     def roll(self):
         self.num = random.randint(1,6)
 
-    def draw(self, surface, turn):
-        if turn == "black":
-            rec_color = BLACK
-            circ_color = WHITE
-        else:
-            rec_color = WHITE
-            circ_color = BLACK
+    def draw(self, surface, turn, first_2_moves_is_made):
+        if turn == "black" and first_2_moves_is_made:
+            self.rec_color = BLACK
+            self.circ_color = WHITE
+        
+        if turn == "white" and first_2_moves_is_made:
+            self.rec_color = WHITE
+            self.circ_color = BLACK
         
         plain_dice = pygame.Surface((self.width, self.height))
-        plain_dice.fill(rec_color)
+        plain_dice.fill(self.rec_color)
         if self.num == 1:
-            self.draw_circle(plain_dice, int(self.width / 2), int(self.height / 2), 4, circ_color)
+            self.draw_circle(plain_dice, int(self.width / 2), int(self.height / 2), 4, self.circ_color)
         
         elif self.num == 2:
-            self.draw_circle(plain_dice, int(self.width / 6), int(self.height / 6), 4, circ_color)
-            self.draw_circle(plain_dice, int(self.width * 5 / 6), int(self.height * 5 / 6), 4, circ_color)
+            self.draw_circle(plain_dice, int(self.width / 6), int(self.height / 6), 4, self.circ_color)
+            self.draw_circle(plain_dice, int(self.width * 5 / 6), int(self.height * 5 / 6), 4, self.circ_color)
         
         elif self.num == 3:
-            self.draw_circle(plain_dice, int(self.width / 6), int(self.height / 6), 4, circ_color)
-            self.draw_circle(plain_dice, int(self.width / 2), int(self.height / 2), 4, circ_color)
-            self.draw_circle(plain_dice, int(self.width * 5 / 6), int(self.height * 5 / 6), 4, circ_color)
+            self.draw_circle(plain_dice, int(self.width / 6), int(self.height / 6), 4, self.circ_color)
+            self.draw_circle(plain_dice, int(self.width / 2), int(self.height / 2), 4, self.circ_color)
+            self.draw_circle(plain_dice, int(self.width * 5 / 6), int(self.height * 5 / 6), 4, self.circ_color)
         
         elif self.num == 4:
-            self.draw_circle(plain_dice, int(self.width / 6), int(self.height / 6), 4, circ_color)
-            self.draw_circle(plain_dice, int(self.width * 5 / 6), int(self.height / 6), 4, circ_color)
-            self.draw_circle(plain_dice, int(self.width / 6), int(self.height * 5 / 6), 4, circ_color)
-            self.draw_circle(plain_dice, int(self.width * 5 / 6), int(self.height * 5 / 6), 4, circ_color)
+            self.draw_circle(plain_dice, int(self.width / 6), int(self.height / 6), 4, self.circ_color)
+            self.draw_circle(plain_dice, int(self.width * 5 / 6), int(self.height / 6), 4, self.circ_color)
+            self.draw_circle(plain_dice, int(self.width / 6), int(self.height * 5 / 6), 4, self.circ_color)
+            self.draw_circle(plain_dice, int(self.width * 5 / 6), int(self.height * 5 / 6), 4, self.circ_color)
         
         elif self.num == 5:
-            self.draw_circle(plain_dice, int(self.width / 6), int(self.height / 6), 4, circ_color)
-            self.draw_circle(plain_dice, int(self.width * 5 / 6), int(self.height / 6), 4, circ_color)
-            self.draw_circle(plain_dice, int(self.width / 2), int(self.height / 2), 4, circ_color)
-            self.draw_circle(plain_dice, int(self.width / 6), int(self.height * 5 / 6), 4, circ_color)
-            self.draw_circle(plain_dice, int(self.width * 5 / 6), int(self.height * 5 / 6), 4, circ_color)
+            self.draw_circle(plain_dice, int(self.width / 6), int(self.height / 6), 4, self.circ_color)
+            self.draw_circle(plain_dice, int(self.width * 5 / 6), int(self.height / 6), 4, self.circ_color)
+            self.draw_circle(plain_dice, int(self.width / 2), int(self.height / 2), 4, self.circ_color)
+            self.draw_circle(plain_dice, int(self.width / 6), int(self.height * 5 / 6), 4, self.circ_color)
+            self.draw_circle(plain_dice, int(self.width * 5 / 6), int(self.height * 5 / 6), 4, self.circ_color)
         
         elif self.num == 6:
-            self.draw_circle(plain_dice, int(self.width / 6), int(self.height / 6), 4, circ_color)
-            self.draw_circle(plain_dice, int(self.width / 6), int(self.height / 2), 4, circ_color)
-            self.draw_circle(plain_dice, int(self.width / 6), int(self.height * 5 / 6), 4, circ_color)
-            self.draw_circle(plain_dice, int(self.width * 5 / 6), int(self.height / 6), 4, circ_color)
-            self.draw_circle(plain_dice, int(self.width * 5 / 6), int(self.height / 2), 4, circ_color)
-            self.draw_circle(plain_dice, int(self.width * 5 / 6), int(self.height * 5 / 6), 4, circ_color)
+            self.draw_circle(plain_dice, int(self.width / 6), int(self.height / 6), 4, self.circ_color)
+            self.draw_circle(plain_dice, int(self.width / 6), int(self.height / 2), 4, self.circ_color)
+            self.draw_circle(plain_dice, int(self.width / 6), int(self.height * 5 / 6), 4, self.circ_color)
+            self.draw_circle(plain_dice, int(self.width * 5 / 6), int(self.height / 6), 4, self.circ_color)
+            self.draw_circle(plain_dice, int(self.width * 5 / 6), int(self.height / 2), 4, self.circ_color)
+            self.draw_circle(plain_dice, int(self.width * 5 / 6), int(self.height * 5 / 6), 4, self.circ_color)
         # x and y are the top left corner cords.
         surface.blit(plain_dice, (self.x_top_left, self.y_top_left)) 
 

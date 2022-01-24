@@ -379,19 +379,19 @@ class Board():
         dices_y = HEIGHT / 2 - dices_height / 2
        
         dice_1_x = self.horizontal_border_size + self.board_play_area_width - self.board_play_rect_width / 2 + 55
-        dice_1 = Dice(dices_width, dices_height, WHITE, dice_1_x, dices_y)
+        dice_1 = Dice(dices_width, dices_height, dice_1_x, dices_y)
         dices.append(dice_1)
        
         dice_2_x = dice_1_x - 50
-        dice_2 = Dice(dices_width, dices_height, WHITE, dice_2_x, dices_y)
+        dice_2 = Dice(dices_width, dices_height, dice_2_x, dices_y)
         dices.append(dice_2)
 
         dice_3_x = dice_2_x - 50
-        dice_3 = Dice(dices_width, dices_height, WHITE, dice_3_x, dices_y)
+        dice_3 = Dice(dices_width, dices_height, dice_3_x, dices_y)
         dices.append(dice_3)
 
         dice_4_x = dice_3_x - 50  
-        dice_4 = Dice(dices_width, dices_height, WHITE, dice_4_x, dices_y)
+        dice_4 = Dice(dices_width, dices_height, dice_4_x, dices_y)
         dices.append(dice_4)
 
         return dices   
