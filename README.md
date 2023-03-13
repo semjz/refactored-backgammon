@@ -1,4 +1,6 @@
-This is a backgammon game. In the curreent version it is playable on one computer. please run main.py.
+This is a backgammon game. In the curreent version it is playable on one computer. 
+
+To run the game use this command: python main.py
 
 Here is a video of me playing the game:
 
