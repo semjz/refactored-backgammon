@@ -1,4 +1,4 @@
-This is a backgammon game. In the curreent version it is playable on one computer. 
+This is a backgammon game, in the curreent version it is playable on one computer and players need to take turns. 
 
 To run the game:
 1. clone the repo
