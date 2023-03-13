@@ -1,9 +1,9 @@
 This is a backgammon game. In the curreent version it is playable on one computer. 
 
 To run the game:
-1- clone the repo
-2- checkout developer in the local get repo.
-3- run this command: python main.py
+1. clone the repo
+2. checkout developer in the local get repo.
+3. run this command: python main.py
 
 Here is a video of me playing the game:
 
